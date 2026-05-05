@@ -69,6 +69,9 @@ jobs:
           cle verify \
             --reporter sarif:cle-results.sarif
 
+      - run: cat cle-results.sarif
+        if: always() && hashFiles('cle-results.sarif') != ''
+
       - name: Upload SARIF
         # Always upload — even if cle exited 1 because findings exist.
         # The hashFiles guard skips upload when cle crashed before writing.
