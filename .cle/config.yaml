@@ -46,15 +46,15 @@ context: |
   Two roles: regular user and admin. Admin is seedable via env;
   there is no self-service admin promotion.
 
-requirements:
-  include:
-    - V2.2.1 # Input validation enforcement
-    - V3.3.1 # Cookie Secure attribute / __Host- prefix
-    - V3.4.5 # X-Content-Type-Options: nosniff header
-    - V5.3.2 # File path generation / sanitization (traversal)
-    - V6.2.1 # Password length minimum
-    - V7.4.1 # Session termination on logout
-    - V8.2.1 # Function-level access control
+# requirements:
+#   include:
+#     - V2.2.1 # Input validation enforcement
+#     - V3.3.1 # Cookie Secure attribute / __Host- prefix
+#     - V3.4.5 # X-Content-Type-Options: nosniff header
+#     - V5.3.2 # File path generation / sanitization (traversal)
+#     - V6.2.1 # Password length minimum
+#     - V7.4.1 # Session termination on logout
+#     - V8.2.1 # Function-level access control
 
 scope:
   # Allowlist — only these paths are eligible for analysis.
@@ -74,9 +74,9 @@ scope:
   respect_gitignore: true
 
 agent:
-  model: anthropic:claude-sonnet-4-6
-  max_concurrency: 10
-  timeout_seconds: 10000
+  model: ollama:kimi-k2.6:cloud
+  max_concurrency: 25
+  timeout_seconds: 60000
   thinking: true
 
 output:
