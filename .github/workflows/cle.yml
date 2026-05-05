@@ -52,6 +52,7 @@ jobs:
       - name: Run cle (PR diff)
         if: github.event_name == 'pull_request'
         env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
           OLLAMA_BASE_URL: https://ollama.com/v1
           LOGFIRE_TOKEN: ${{ secrets.LOGFIRE_TOKEN }}
@@ -65,6 +66,7 @@ jobs:
       - name: Run cle (full scan)
         if: github.event_name != 'pull_request'
         env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
           OLLAMA_BASE_URL: https://ollama.com/v1
           LOGFIRE_TOKEN: ${{ secrets.LOGFIRE_TOKEN }}
