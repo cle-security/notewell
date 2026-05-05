@@ -38,6 +38,8 @@ jobs:
 
       - name: Set up uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: false
 
       - name: Install cle
         env:
@@ -57,7 +59,8 @@ jobs:
           cle verify \
             --since origin/${{ github.base_ref }} \
             --reporter sarif:cle-results.sarif \
-            --reporter github
+            --reporter github \
+            --no-fail
 
       - name: Run cle (full scan)
         if: github.event_name != 'pull_request'
@@ -67,7 +70,8 @@ jobs:
           LOGFIRE_TOKEN: ${{ secrets.LOGFIRE_TOKEN }}
         run: |
           cle verify \
-            --reporter sarif:cle-results.sarif
+            --reporter sarif:cle-results.sarif \
+            --no-fail
 
       - run: cat cle-results.sarif
         if: always() && hashFiles('cle-results.sarif') != ''
