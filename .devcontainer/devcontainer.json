@@ -34,7 +34,8 @@
         "vitest.explorer",
         "qwtel.sqlite-viewer",
         "anthropic.claude-code",
-        "redhat.vscode-yaml"
+        "redhat.vscode-yaml",
+        "MS-SarifVSCode.sarif-viewer"
       ],
       "settings": {
         "editor.formatOnSave": true,
