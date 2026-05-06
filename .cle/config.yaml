@@ -65,7 +65,6 @@ scope:
     - "packages/**/src/**"
     - "apps/api/prisma/schema.prisma"
   exclude:
-    - "README.md"
     - "**/*.test.ts"
     - "**/*.spec.ts"
     - "**/__tests__/**"
