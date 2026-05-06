@@ -13,6 +13,7 @@ model User {
   username     String   @unique
   displayName  String
   bio          String   @default("")
+  website      String?
   passwordHash String
   role         String   @default("user") // "user" | "admin"
   disabled     Boolean  @default(false)
