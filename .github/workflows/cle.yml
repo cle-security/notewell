@@ -75,10 +75,14 @@ jobs:
             --reporter sarif:cle-results.sarif \
             --no-fail
 
-      - run: cat cle-results.sarif
+      - name: Upload SARIF as artifact
         if: always() && hashFiles('cle-results.sarif') != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: cle-results
+          path: cle-results.sarif
 
-      - name: Upload SARIF
+      - name: Upload SARIF to GitHub Code Scanning
         # Always upload — even if cle exited 1 because findings exist.
         # The hashFiles guard skips upload when cle crashed before writing.
         if: always() && hashFiles('cle-results.sarif') != ''
