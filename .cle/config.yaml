@@ -70,7 +70,8 @@ scope:
 
 agent:
   #model: openai:moonshotai/Kimi-K2.6 # Infomaniak
-  model: ollama:kimi-k2.6:cloud # Ollama Cloud
+  #model: ollama:kimi-k2.6:cloud # Ollama Cloud
+  model: ollama:gemma4:31b-cloud # Ollama Cloud
   max_concurrency: 25
   timeout_seconds: 60000
   thinking: true
