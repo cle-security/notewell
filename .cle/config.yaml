@@ -36,38 +36,38 @@ context: |
 
 requirements:
   exclude:
-    # Already excluded — architecture genuinely lacks these
-    - "V9.*" # Self-contained tokens (JWT) — session-based auth, no JWTs
-    - "V10.*" # OAuth and OIDC — no federated auth flows
-    - "V17.*" # WebRTC — not used
+    # Chapters out
+    - "V9.*" # Self-contained tokens
+    - "V10.*" # OAuth and OIDC
+    - "V17.*" # WebRTC
 
-    # Architecture genuinely lacks these (continued)
-    - "V4.2.*" # Load-balancer / firewall posture — handled at infrastructure, out of app's responsibility
-    - "V4.3.*" # GraphQL — this is a REST/JSON API
-    - "V4.4.*" # WebSocket — none used
-    - "V6.4.*" # System-generated initial passwords / activation codes — self-signup; no admin-creates-user flow
-    - "V6.5.*" # Look-up secrets / OOB / OTP — no MFA mechanism by design
-    - "V6.6.*" # PSTN / SMS authentication — no SMS-based flows
-    - "V6.8.*" # Multi-IdP — single auth pathway
-    - "V7.6.*" # RP/IdP federation session lifetime — no federation
-    - "V8.4.*" # Multi-tenant cross-tenant controls — single-tenant
-    - "V12.3.*" # TLS for external outbound connections — no outbound HTTP from the API
-    - "V13.2.*" # Inter-component authentication — single-app deployment, no internal-service mesh
+    # Sections architecture genuinely lacks
+    - "V4.2" # Load balancer / firewall — handled at infrastructure
+    - "V4.3" # GraphQL — REST API
+    - "V4.4" # WebSocket — none used
+    - "V6.4" # System-generated initial passwords — self-signup
+    - "V6.5" # Look-up secrets / OOB / OTP — no MFA
+    - "V6.6" # PSTN / SMS auth — no SMS flows
+    - "V6.8" # Multi-IdP — single auth pathway
+    - "V7.6" # RP/IdP federation session lifetime — no federation
+    - "V8.4" # Multi-tenant cross-tenant controls — single-tenant
+    - "V12.3" # TLS for outbound — no outbound HTTP
+    - "V13.2" # Inter-component auth — single-app deployment
 
-    # Intentional architectural choice — risk accepted for small-startup posture
-    - "V6.3.*" # Anti-automation / rate limiting — deferred. Argon2 cost + small attack surface is the current bar.
-    - "V2.4.*" # Anti-automation against excessive calls — same rationale as V6.3.
+    # Intentional architectural choice
+    - "V6.3" # Anti-automation / rate limiting — deferred
+    - "V2.4" # Anti-automation against excessive calls — same rationale
 
-    # Documentation requirements without a code-level fix path — demo doesn't carry the documentation regime
-    - "V2.1.*" # Input-validation rules documentation
-    - "V5.1.*" # File upload documentation
-    - "V6.1.*" # Authentication controls documentation
-    - "V8.1.*" # Authorization rules documentation
-    - "V11.1.*" # Cryptographic key management policy
-    - "V13.1.*" # Communication needs documentation
-    - "V14.1.*" # Sensitive data classification policy
-    - "V15.1.*" # Third-party vulnerability remediation timeframes
-    - "V16.1.*" # Logging inventory documentation
+    # Documentation paperwork
+    - "V2.1" # Input validation rules documentation
+    - "V5.1" # File upload documentation
+    - "V6.1" # Auth controls documentation
+    - "V8.1" # Authorization rules documentation
+    - "V11.1" # Cryptographic key management policy
+    - "V13.1" # Communication needs documentation
+    - "V14.1" # Sensitive data classification policy
+    - "V15.1" # 3rd-party remediation timeframes
+    - "V16.1" # Logging inventory documentation
 
 agent:
   #model: openai:moonshotai/Kimi-K2.6 # Infomaniak
