@@ -167,25 +167,25 @@
     },
     "ScopeConfig": {
       "additionalProperties": false,
-      "description": "Which files in the repo are eligible for analysis.",
+      "description": "Which files in the repo are eligible for analysis.\n\nScope filtering is for **files the verifier shouldn't bother\nanalyzing** \u2014 vendored dependencies, build outputs, tests with\nintentional security flaws. It is NOT a place to limit what the\nverifier *checks*; for that, use `requirements.exclude`, which\ncarries an explicit rationale per excluded requirement.\n\nSensible defaults are applied automatically (gitignore, common\nbuild and cache directories, binary file extensions). Most\nprojects don't need to set anything here at all.",
       "properties": {
         "include": {
-          "description": "Glob patterns to include. Empty list means the whole repo.",
+          "description": "Glob patterns to include. Empty (the default) means the whole repo, minus the automatic skips and any patterns in `exclude`. Use this only when you genuinely need to restrict analysis to a subset (e.g. monorepo scoping) \u2014 NOT to limit which requirements run. README, package.json, Dockerfile, and similar config/manifest files are often load-bearing for verification; restricting to source directories will hide them from the verifier.",
           "items": {
             "type": "string"
           },
           "title": "Include",
           "type": "array",
-          "markdownDescription": "Glob patterns to include. Empty list means the whole repo."
+          "markdownDescription": "Glob patterns to include. Empty (the default) means the whole repo, minus the automatic skips and any patterns in `exclude`. Use this only when you genuinely need to restrict analysis to a subset (e.g. monorepo scoping) \u2014 NOT to limit which requirements run. README, package.json, Dockerfile, and similar config/manifest files are often load-bearing for verification; restricting to source directories will hide them from the verifier."
         },
         "exclude": {
-          "description": "Glob patterns to exclude (in addition to gitignore).",
+          "description": "Glob patterns to exclude, applied after gitignore and the built-in skips. Common additions: `**/*.test.ts`, `**/*.spec.ts`, `**/__tests__/**`, `**/fixtures/**`, `**/*.min.js`.",
           "items": {
             "type": "string"
           },
           "title": "Exclude",
           "type": "array",
-          "markdownDescription": "Glob patterns to exclude (in addition to gitignore)."
+          "markdownDescription": "Glob patterns to exclude, applied after gitignore and the built-in skips. Common additions: `**/*.test.ts`, `**/*.spec.ts`, `**/__tests__/**`, `**/fixtures/**`, `**/*.min.js`."
         },
         "respect_gitignore": {
           "default": true,
@@ -195,7 +195,7 @@
       },
       "title": "ScopeConfig",
       "type": "object",
-      "markdownDescription": "Which files in the repo are eligible for analysis."
+      "markdownDescription": "Which files in the repo are eligible for analysis.\n\nScope filtering is for **files the verifier shouldn't bother\nanalyzing** \u2014 vendored dependencies, build outputs, tests with\nintentional security flaws. It is NOT a place to limit what the\nverifier *checks*; for that, use `requirements.exclude`, which\ncarries an explicit rationale per excluded requirement.\n\nSensible defaults are applied automatically (gitignore, common\nbuild and cache directories, binary file extensions). Most\nprojects don't need to set anything here at all."
     },
     "Suppression": {
       "additionalProperties": false,
@@ -284,26 +284,26 @@
           {
             "const": "asvs-l1",
             "title": "asvs-l1",
-            "description": "OWASP ASVS Level 1 \u2014 70 requirements",
-            "markdownDescription": "OWASP ASVS Level 1 \u2014 70 requirements"
+            "description": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 1: critical starting point covering ~20% of requirements. Focuses on first-layer defenses against common attacks that don't require other vulnerabilities to be exploitable.",
+            "markdownDescription": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 1: critical starting point covering ~20% of requirements. Focuses on first-layer defenses against common attacks that don't require other vulnerabilities to be exploitable."
           },
           {
             "const": "asvs-l2",
             "title": "asvs-l2",
-            "description": "OWASP ASVS Level 2 \u2014 253 requirements",
-            "markdownDescription": "OWASP ASVS Level 2 \u2014 253 requirements"
+            "description": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 2: recommended for most applications, covering ~70% of requirements. Adds protections against less common attacks and more complex defenses that may require certain preconditions to exploit.",
+            "markdownDescription": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 2: recommended for most applications, covering ~70% of requirements. Adds protections against less common attacks and more complex defenses that may require certain preconditions to exploit."
           },
           {
             "const": "asvs-l3",
             "title": "asvs-l3",
-            "description": "OWASP ASVS Level 3 \u2014 345 requirements",
-            "markdownDescription": "OWASP ASVS Level 3 \u2014 345 requirements"
+            "description": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 3: highest level of security covering all requirements. Adds defense-in-depth mechanisms and hard-to-implement controls for applications demanding the strongest assurance.",
+            "markdownDescription": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 3: highest level of security covering all requirements. Adds defense-in-depth mechanisms and hard-to-implement controls for applications demanding the strongest assurance."
           },
           {
             "const": "masvs",
             "title": "masvs",
-            "description": "OWASP MASVS \u2014 24 requirements",
-            "markdownDescription": "OWASP MASVS \u2014 24 requirements"
+            "description": "The OWASP MASVS (Mobile Application Security Verification Standard) is the industry standard for mobile app security. It can be used by mobile software architects and developers seeking to develop secure mobile apps, as well as security testers to ensure completeness and consistency of test results.",
+            "markdownDescription": "The OWASP MASVS (Mobile Application Security Verification Standard) is the industry standard for mobile app security. It can be used by mobile software architects and developers seeking to develop secure mobile apps, as well as security testers to ensure completeness and consistency of test results."
           },
           {
             "type": "string",
@@ -345,13 +345,6 @@
       },
       "title": "Suppressions",
       "type": "array"
-    },
-    "dedupe": {
-      "default": true,
-      "description": "Run a post-verification agent that clusters findings by root cause and merges duplicates. Multiple requirements often flag the same code gap from different angles; this collapses them into one canonical finding per cluster while leaving per-requirement verdicts untouched. Disable to keep every finding the verifier produces.",
-      "title": "Dedupe",
-      "type": "boolean",
-      "markdownDescription": "Run a post-verification agent that clusters findings by root cause and merges duplicates. Multiple requirements often flag the same code gap from different angles; this collapses them into one canonical finding per cluster while leaving per-requirement verdicts untouched. Disable to keep every finding the verifier produces."
     },
     "agent": {
       "$ref": "#/$defs/AgentConfig"
