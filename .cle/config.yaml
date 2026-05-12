@@ -34,51 +34,9 @@ context: |
 
   Two roles: regular user and admin. Admin is seedable via env; no self-service admin promotion.
 
-requirements:
-  exclude:
-    # Chapters out
-    - "V9.*" # Self-contained tokens
-    - "V10.*" # OAuth and OIDC
-    - "V17.*" # WebRTC
-
-    # Sections architecture genuinely lacks
-    - "V4.2" # Load balancer / firewall — handled at infrastructure
-    - "V4.3" # GraphQL — REST API
-    - "V4.4" # WebSocket — none used
-    - "V6.4" # System-generated initial passwords — self-signup
-    - "V6.5" # Look-up secrets / OOB / OTP — no MFA
-    - "V6.6" # PSTN / SMS auth — no SMS flows
-    - "V6.8" # Multi-IdP — single auth pathway
-    - "V7.6" # RP/IdP federation session lifetime — no federation
-    - "V8.4" # Multi-tenant cross-tenant controls — single-tenant
-    - "V12.3" # TLS for outbound — no outbound HTTP
-    - "V13.2" # Inter-component auth — single-app deployment
-
-    # Intentional architectural choice — risk accepted
-    - "V6.3" # Anti-automation / rate limiting — deferred
-    - "V2.4" # Anti-automation against excessive calls — same rationale
-    - "V15.2.2" # ★ NEW: anti-automation for resource-intensive endpoints (argon2 amplification) — same rationale as V6.3
-
-    # Documentation paperwork — sections
-    - "V2.1" # Input validation rules documentation
-    - "V5.1" # File upload documentation
-    - "V6.1" # Auth controls documentation
-    - "V8.1" # Authorization rules documentation
-    - "V11.1" # Cryptographic key management policy
-    - "V13.1" # Communication needs documentation
-    - "V14.1" # Sensitive data classification policy
-    - "V15.1" # 3rd-party remediation timeframes
-    - "V16.1" # Logging inventory documentation
-
-    # Documentation seams — sub-reqs in code-enforcement sections that
-    # reference documentation we don't carry (paired with the section above)
-    - "V15.2.1" # ★ NEW: "documented remediation time frames" — V15.1 excluded
-    - "V16.2.3" # ★ NEW: "documented in the log inventory" — V16.1 excluded
-    - "V6.2.11" # ★ NEW: "documented list of context-specific words" — V6.1 excluded
-
 agent:
   #model: openai:moonshotai/Kimi-K2.6 # Infomaniak
-  model: ollama:kimi-k2.6:cloud # Ollama Cloud
+  model: ollama:gemma4:31b-cloud # Ollama Cloud
   #model: ollama:gemma4:31b-cloud # Ollama Cloud
   #model: anthropic:claude-opus-4-7
   max_concurrency: 25
