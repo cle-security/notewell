@@ -59,7 +59,7 @@ jobs:
         run: |
           cle verify \
             --since origin/${{ github.base_ref }} \
-            --reporter sarif-github:cle-results-github.sarif \
+            --reporter github \
             --reporter sarif:cle-results.sarif \
             --no-fail
 

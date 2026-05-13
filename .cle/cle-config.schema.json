@@ -79,6 +79,7 @@
           "enum": [
             "pretty",
             "sarif",
+            "sarif-github",
             "json",
             "markdown",
             "github"
@@ -99,6 +100,7 @@
           "enum": [
             "pretty",
             "sarif",
+            "sarif-github",
             "json",
             "markdown",
             "github"
