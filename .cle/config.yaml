@@ -36,12 +36,12 @@ context: |
 
 agent:
   #model: openai:moonshotai/Kimi-K2.6 # Infomaniak
-  model: ollama:kimi-k2.6:cloud # Ollama Cloud
+  model: fireworks:accounts/fireworks/models/kimi-k2p6 # Ollama Cloud
   #model: ollama:gemma4:31b-cloud # Ollama Cloud
   #model: anthropic:claude-opus-4-7
-  max_concurrency: 25
+  max_concurrency: 10
   timeout_seconds: 60000
-  thinking: "high"
+  thinking: True
 
 output:
   default_reporter: pretty
