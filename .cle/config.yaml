@@ -39,7 +39,7 @@ agent:
   model: fireworks:accounts/fireworks/models/kimi-k2p6 # Ollama Cloud
   #model: ollama:gemma4:31b-cloud # Ollama Cloud
   #model: anthropic:claude-opus-4-7
-  max_concurrency: 10
+  max_concurrency: 5
   timeout_seconds: 60000
   thinking: True
 
