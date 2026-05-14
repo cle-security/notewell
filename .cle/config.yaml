@@ -34,6 +34,12 @@ context: |
 
   Two roles: regular user and admin. Admin is seedable via env; no self-service admin promotion.
 
+scope:
+  exclude:
+    - .cle/*
+    - .github/workflows/cle.yml
+  respect_gitignore: true
+
 agent:
   #model: openai:moonshotai/Kimi-K2.6 # Infomaniak
   model: fireworks:accounts/fireworks/models/kimi-k2p6 # Ollama Cloud
