@@ -44,10 +44,10 @@ requirements:
 agent:
   #model: openai:moonshotai/Kimi-K2.6 # Infomaniak
   #model: fireworks:accounts/fireworks/models/kimi-k2p6
-  model: fireworks:accounts/fireworks/models/minimax-m2p7
-  #model: ollama:gemma4:31b-cloud
+  #model: fireworks:accounts/fireworks/models/minimax-m2p7
+  model: ollama:glm-5.1:cloud
   #model: anthropic:claude-opus-4-7
-  max_concurrency: 10
+  max_concurrency: 1
   timeout_seconds: 60000
   thinking: True
 
