@@ -34,11 +34,12 @@ context: |
 
   Two roles: regular user and admin. Admin is seedable via env; no self-service admin promotion.
 
-scope:
+requirements:
   exclude:
-    - .cle/*
-    - .github/workflows/cle.yml
-  respect_gitignore: true
+    - V4.3.* # GraphQL
+    - V4.4.* # WebSocket
+    - V10.* # OAuth and OIDC
+    - V17.* # WebRTC
 
 agent:
   #model: openai:moonshotai/Kimi-K2.6 # Infomaniak
@@ -46,7 +47,7 @@ agent:
   model: fireworks:accounts/fireworks/models/minimax-m2p7
   #model: ollama:gemma4:31b-cloud
   #model: anthropic:claude-opus-4-7
-  max_concurrency: 8
+  max_concurrency: 10
   timeout_seconds: 60000
   thinking: True
 
