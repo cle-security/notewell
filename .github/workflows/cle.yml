@@ -43,8 +43,9 @@ jobs:
         env:
           CLE_TOKEN: ${{ secrets.CLE_INSTALL_TOKEN }}
         run: |
-          uv tool install --from \
-            "git+https://x-access-token:${CLE_TOKEN}@github.com/cle-security/cle.git#subdirectory=cle_cli" \
+          uv tool install \
+            --exclude-newer "4 days" \
+            --from "git+https://x-access-token:${CLE_TOKEN}@github.com/cle-security/cle.git#subdirectory=cle_cli" \
             cle-cli
 
       - name: Run cle (PR diff)
