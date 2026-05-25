@@ -1,59 +1,41 @@
-# yaml-language-server: $schema=./cle-config.schema.json
-#
-# Drop a copy of cle's published JSON schema at the path above (or
-# remove this line) so VSCode autocompletes fields. The schema lives
-# in the cle repo at cle_cli/cle_cli/schemas/cle-config.schema.json.
+# yaml-language-server: $schema=./schemas/cle-config.schema.json
 
 version: 1
 
-packs:
-  - asvs-l2
+# Which requirement baseline to verify against. Run `cle list-baselines`
+# to see what ships built-in, or reference a custom baseline by file path.
+baseline: asvs-l2
 
-# The verifier reads `context` as a Markdown briefing and lets it
-# inform applicability decisions ("no MFA isn't a gap — it's out of
-# scope by design"). Be honest about what the app is and isn't;
-# inflated context produces inflated findings.
-context: |
-  ## Stack
+# Optional: subset or exclude requirements. `include` is a list of ids
+# or fnmatch globs; `exclude` entries pair a pattern with a rationale.
+# requirements:
+#   include:
+#     - V5.*
+#   exclude:
+#     - requirement: V8.3.*
+#       reason: No file uploads in this codebase.
 
-  - Backend: Node 20 + TypeScript + Fastify + Prisma + SQLite
-  - Frontend: Vue 3 + Vite + Pinia + Vue Router
-  - pnpm workspaces (apps/api, apps/web, packages/types)
-  - SQLite is in-process; no database server
-  - File uploads stored on local disk under uploads/, served via API with per-request access checks
+# Optional: scope which files are analyzed.
+# scope:
+#   include:
+#     - "src/**"
+#   exclude:
+#     - "**/*.test.ts"
 
-  ## Authentication and sessions
+# Optional: reviewed exceptions to known findings.
+# suppressions:
+#   - requirement: V5.1.4
+#     path: src/legacy/parser.ts
+#     reason: Legacy module scheduled for rewrite Q2
+#     expires: 2026-06-01
 
-  Local signup with email + password. Argon2id for password hashing. Sessions are signed httpOnly sameSite=lax cookies, DB-backed.
-
-  ## Rendering
-
-  Note bodies and user bios are markdown, rendered client-side via marked + DOMPurify → v-html.
-
-  ## Roles
-
-  Two roles: regular user and admin. Admin is seedable via env; no self-service admin promotion.
-
-requirements:
-  exclude:
-    - V4.3.* # GraphQL
-    - V4.4.* # WebSocket
-    - V10.* # OAuth and OIDC
-    - V17.* # WebRTC
-
+# LLM and concurrency tuning.
 agent:
-  #model: openai:moonshotai/Kimi-K2.6 # Infomaniak
-  #model: fireworks:accounts/fireworks/models/kimi-k2p6
-  #model: fireworks:accounts/fireworks/models/minimax-m2p7
-  model: fireworks:accounts/fireworks/models/deepseek-v4-pro
-  #model: ollama:glm-5.1:cloud
-  #model: anthropic:claude-opus-4-7
-  max_concurrency: 8
-  timeout_seconds: 60000
-  thinking: True
+  model: ollama:glm-5.1:cloud
+  max_concurrency: 4
 
-default_reporter: pretty
-
-observability:
-  # Only a demo repo - nothing sensitive
-  dangerously_disable_log_scrubbing: true
+# Optional: how findings are reported. Default is `pretty` to stdout.
+# reporters:
+#   - type: sarif
+#     output: results.sarif
+#   - type: pretty

@@ -94,9 +94,40 @@
       ],
       "type": "string"
     },
+    "RequirementExclusion": {
+      "additionalProperties": false,
+      "description": "A user-authored declaration that a requirement does not apply.\n\nEach exclusion carries a human-readable rationale, mirroring the lock\nfile's agent-discovered exclusions so a reviewer can see why any given\nrequirement was skipped.",
+      "properties": {
+        "requirement": {
+          "description": "Requirement id or fnmatch glob to drop.",
+          "examples": [
+            "V8.3.1",
+            "V8.3.*"
+          ],
+          "minLength": 1,
+          "title": "Requirement",
+          "type": "string",
+          "markdownDescription": "Requirement id or fnmatch glob to drop."
+        },
+        "reason": {
+          "description": "Human-readable rationale; surfaced in logs and reports.",
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string",
+          "markdownDescription": "Human-readable rationale; surfaced in logs and reports."
+        }
+      },
+      "required": [
+        "requirement",
+        "reason"
+      ],
+      "title": "RequirementExclusion",
+      "type": "object",
+      "markdownDescription": "A user-authored declaration that a requirement does not apply.\n\nEach exclusion carries a human-readable rationale, mirroring the lock\nfile's agent-discovered exclusions so a reviewer can see why any given\nrequirement was skipped."
+    },
     "RequirementSelector": {
       "additionalProperties": false,
-      "description": "Filters applied on top of the requirements pulled from packs.",
+      "description": "Filters applied on top of the requirements pulled from the baseline.",
       "properties": {
         "include": {
           "description": "Requirement ids or glob patterns to keep.",
@@ -114,23 +145,26 @@
           "markdownDescription": "Requirement ids or glob patterns to keep."
         },
         "exclude": {
-          "description": "Requirement ids or glob patterns to drop.",
+          "description": "Requirements to drop, each with a rationale.",
           "examples": [
             [
-              "V8.3.*"
+              {
+                "reason": "No file uploads in this codebase.",
+                "requirement": "V8.3.*"
+              }
             ]
           ],
           "items": {
-            "type": "string"
+            "$ref": "#/$defs/RequirementExclusion"
           },
           "title": "Exclude",
           "type": "array",
-          "markdownDescription": "Requirement ids or glob patterns to drop."
+          "markdownDescription": "Requirements to drop, each with a rationale."
         }
       },
       "title": "RequirementSelector",
       "type": "object",
-      "markdownDescription": "Filters applied on top of the requirements pulled from packs."
+      "markdownDescription": "Filters applied on top of the requirements pulled from the baseline."
     },
     "ScopeConfig": {
       "additionalProperties": false,
@@ -265,63 +299,41 @@
       "type": "integer",
       "markdownDescription": "Config schema version. Bumped on breaking changes."
     },
-    "packs": {
-      "description": "Built-in pack identifiers or paths to custom pack files. Multiple packs are merged; conflicting requirement ids are an error.",
-      "items": {
-        "anyOf": [
-          {
-            "const": "asvs-l1",
-            "title": "asvs-l1",
-            "description": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 1: critical starting point covering ~20% of requirements. Focuses on first-layer defenses against common attacks that don't require other vulnerabilities to be exploitable.",
-            "markdownDescription": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 1: critical starting point covering ~20% of requirements. Focuses on first-layer defenses against common attacks that don't require other vulnerabilities to be exploitable."
-          },
-          {
-            "const": "asvs-l2",
-            "title": "asvs-l2",
-            "description": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 2: recommended for most applications, covering ~70% of requirements. Adds protections against less common attacks and more complex defenses that may require certain preconditions to exploit.",
-            "markdownDescription": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 2: recommended for most applications, covering ~70% of requirements. Adds protections against less common attacks and more complex defenses that may require certain preconditions to exploit."
-          },
-          {
-            "const": "asvs-l3",
-            "title": "asvs-l3",
-            "description": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 3: highest level of security covering all requirements. Adds defense-in-depth mechanisms and hard-to-implement controls for applications demanding the strongest assurance.",
-            "markdownDescription": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 3: highest level of security covering all requirements. Adds defense-in-depth mechanisms and hard-to-implement controls for applications demanding the strongest assurance."
-          },
-          {
-            "const": "masvs",
-            "title": "masvs",
-            "description": "The OWASP MASVS (Mobile Application Security Verification Standard) is the industry standard for mobile app security. It can be used by mobile software architects and developers seeking to develop secure mobile apps, as well as security testers to ensure completeness and consistency of test results.",
-            "markdownDescription": "The OWASP MASVS (Mobile Application Security Verification Standard) is the industry standard for mobile app security. It can be used by mobile software architects and developers seeking to develop secure mobile apps, as well as security testers to ensure completeness and consistency of test results."
-          },
-          {
-            "type": "string",
-            "description": "Path to a custom pack YAML file.",
-            "markdownDescription": "Path to a custom pack YAML file."
-          }
-        ]
-      },
-      "title": "Packs",
-      "type": "array",
-      "markdownDescription": "Built-in pack identifiers or paths to custom pack files. Multiple packs are merged; conflicting requirement ids are an error."
-    },
-    "context": {
+    "baseline": {
       "anyOf": [
         {
-          "type": "string"
+          "const": "asvs-l1",
+          "title": "asvs-l1",
+          "description": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 1: critical starting point covering ~20% of requirements. Focuses on first-layer defenses against common attacks that don't require other vulnerabilities to be exploitable.",
+          "markdownDescription": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 1: critical starting point covering ~20% of requirements. Focuses on first-layer defenses against common attacks that don't require other vulnerabilities to be exploitable."
         },
         {
-          "type": "null"
+          "const": "asvs-l2",
+          "title": "asvs-l2",
+          "description": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 2: recommended for most applications, covering ~70% of requirements. Adds protections against less common attacks and more complex defenses that may require certain preconditions to exploit.",
+          "markdownDescription": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 2: recommended for most applications, covering ~70% of requirements. Adds protections against less common attacks and more complex defenses that may require certain preconditions to exploit."
+        },
+        {
+          "const": "asvs-l3",
+          "title": "asvs-l3",
+          "description": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 3: highest level of security covering all requirements. Adds defense-in-depth mechanisms and hard-to-implement controls for applications demanding the strongest assurance.",
+          "markdownDescription": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 3: highest level of security covering all requirements. Adds defense-in-depth mechanisms and hard-to-implement controls for applications demanding the strongest assurance."
+        },
+        {
+          "const": "masvs",
+          "title": "masvs",
+          "description": "The OWASP MASVS (Mobile Application Security Verification Standard) is the industry standard for mobile app security. It can be used by mobile software architects and developers seeking to develop secure mobile apps, as well as security testers to ensure completeness and consistency of test results.",
+          "markdownDescription": "The OWASP MASVS (Mobile Application Security Verification Standard) is the industry standard for mobile app security. It can be used by mobile software architects and developers seeking to develop secure mobile apps, as well as security testers to ensure completeness and consistency of test results."
+        },
+        {
+          "type": "string",
+          "description": "Path to a custom baseline YAML file.",
+          "markdownDescription": "Path to a custom baseline YAML file."
         }
       ],
-      "default": null,
-      "description": "Codebase context provided to the verifier as Markdown. Orients the verifier on architecture, tech stack, and scope so it spends fewer tokens re-discovering them from source. Also drives severity calibration \u2014 note deployment surface (public / internal / localhost-only), audience, and data sensitivity so the verifier can judge blast radius and threat-model fit.",
-      "examples": [
-        "This is a Vue SPA with a FastAPI backend. Auth via Auth0, so password-hashing requirements don't apply.",
-        "Production-facing SaaS handling regulated PII; assume hostile internet exposure. Multi-tenant; tenant isolation is a hard boundary.",
-        "Internal CLI tool for engineers, distributed as a wheel. No network exposure; runs against the user's local checkout."
-      ],
-      "title": "Context",
-      "markdownDescription": "Codebase context provided to the verifier as Markdown. Orients the verifier on architecture, tech stack, and scope so it spends fewer tokens re-discovering them from source. Also drives severity calibration \u2014 note deployment surface (public / internal / localhost-only), audience, and data sensitivity so the verifier can judge blast radius and threat-model fit."
+      "description": "Built-in baseline identifier or path to a custom baseline file.",
+      "default": "asvs-l2",
+      "markdownDescription": "Built-in baseline identifier or path to a custom baseline file."
     },
     "requirements": {
       "$ref": "#/$defs/RequirementSelector"

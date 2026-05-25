@@ -1,0 +1,247 @@
+{
+  "$defs": {
+    "BaselineMetadata": {
+      "additionalProperties": false,
+      "description": "Identity and provenance for a baseline.",
+      "properties": {
+        "id": {
+          "description": "Baseline identifier.",
+          "examples": [
+            "asvs-l2",
+            "mycorp-v3"
+          ],
+          "minLength": 1,
+          "title": "Id",
+          "type": "string",
+          "markdownDescription": "Baseline identifier."
+        },
+        "name": {
+          "description": "Human-readable baseline name, displayed in CLI output and reports.",
+          "examples": [
+            "OWASP ASVS Level 2",
+            "ACME Internal Security Standard v3"
+          ],
+          "minLength": 1,
+          "title": "Name",
+          "type": "string",
+          "markdownDescription": "Human-readable baseline name, displayed in CLI output and reports."
+        },
+        "version": {
+          "description": "Semver-style baseline version, independent of tool releases.",
+          "examples": [
+            "1.0.0",
+            "2024.10"
+          ],
+          "minLength": 1,
+          "title": "Version",
+          "type": "string",
+          "markdownDescription": "Semver-style baseline version, independent of tool releases."
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional longer description; surfaced by `cle list-baselines --verbose`.",
+          "title": "Description",
+          "markdownDescription": "Optional longer description; surfaced by `cle list-baselines --verbose`."
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional homepage / source URL for the baseline.",
+          "examples": [
+            "https://owasp.org/www-project-application-security-verification-standard/"
+          ],
+          "title": "Url",
+          "markdownDescription": "Optional homepage / source URL for the baseline."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "version"
+      ],
+      "title": "BaselineMetadata",
+      "type": "object",
+      "markdownDescription": "Identity and provenance for a baseline."
+    },
+    "GroupedRequirement": {
+      "additionalProperties": false,
+      "description": "A topical parent that owns leaf `Requirement`s sharing one fix surface.\n\nCarries no own `statement` \u2014 the verifiable claims live on the\nnested subs. The parent's `title` is the topical heading (e.g. an\nASVS section name like \"Browser Security Mechanism Headers\"). One\nverifier runs against the parent + all its subs in a single agent\ncall and emits findings tagged with which sub(s) each violates.",
+      "properties": {
+        "id": {
+          "description": "Stable identifier unique within the baseline.",
+          "examples": [
+            "V14.4",
+            "ACME-headers"
+          ],
+          "minLength": 1,
+          "title": "Id",
+          "type": "string",
+          "markdownDescription": "Stable identifier unique within the baseline."
+        },
+        "title": {
+          "description": "Topical heading shared by every sub-requirement (e.g. the ASVS section name). Required for grouped entries because the parent carries no statement of its own.",
+          "minLength": 1,
+          "title": "Title",
+          "type": "string",
+          "markdownDescription": "Topical heading shared by every sub-requirement (e.g. the ASVS section name). Required for grouped entries because the parent carries no statement of its own."
+        },
+        "category": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional grouping label for reporters and baseline documentation. Free-form.",
+          "examples": [
+            "Authentication",
+            "Cryptography",
+            "Input validation"
+          ],
+          "title": "Category",
+          "markdownDescription": "Optional grouping label for reporters and baseline documentation. Free-form."
+        },
+        "sub_requirements": {
+          "description": "Leaf requirements verified together as one cohesive review. Each sub carries its own `id` and `statement`; sub ids must be unique within the parent (enforced by `_unique_sub_ids`).",
+          "items": {
+            "$ref": "#/$defs/Requirement"
+          },
+          "minItems": 1,
+          "title": "Sub Requirements",
+          "type": "array",
+          "markdownDescription": "Leaf requirements verified together as one cohesive review. Each sub carries its own `id` and `statement`; sub ids must be unique within the parent (enforced by `_unique_sub_ids`)."
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "sub_requirements"
+      ],
+      "title": "GroupedRequirement",
+      "type": "object",
+      "markdownDescription": "A topical parent that owns leaf `Requirement`s sharing one fix surface.\n\nCarries no own `statement` \u2014 the verifiable claims live on the\nnested subs. The parent's `title` is the topical heading (e.g. an\nASVS section name like \"Browser Security Mechanism Headers\"). One\nverifier runs against the parent + all its subs in a single agent\ncall and emits findings tagged with which sub(s) each violates."
+    },
+    "Requirement": {
+      "additionalProperties": false,
+      "description": "A single verifiable security requirement.\n\nUsed both as a top-level baseline entry (flat) and as the leaf shape\nnested inside `GroupedRequirement.sub_requirements`. Severity is\nnot on the requirement \u2014 the verifier assigns it per finding based\non the observed gap (impact, exposure, exploitability).",
+      "properties": {
+        "id": {
+          "description": "Stable identifier unique within the baseline.",
+          "examples": [
+            "V5.1.3",
+            "ACME-1.1"
+          ],
+          "minLength": 1,
+          "title": "Id",
+          "type": "string",
+          "markdownDescription": "Stable identifier unique within the baseline."
+        },
+        "title": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Short human-readable label. Optional \u2014 ASVS-style requirements have only a statement, while custom baselines typically supply a title for easier scanning.",
+          "title": "Title",
+          "markdownDescription": "Short human-readable label. Optional \u2014 ASVS-style requirements have only a statement, while custom baselines typically supply a title for easier scanning."
+        },
+        "statement": {
+          "description": "The verifiable requirement, written as a positive assertion.",
+          "minLength": 1,
+          "title": "Statement",
+          "type": "string",
+          "markdownDescription": "The verifiable requirement, written as a positive assertion."
+        },
+        "category": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional grouping label for reporters and baseline documentation. Free-form.",
+          "examples": [
+            "Authentication",
+            "Cryptography",
+            "Input validation"
+          ],
+          "title": "Category",
+          "markdownDescription": "Optional grouping label for reporters and baseline documentation. Free-form."
+        }
+      },
+      "required": [
+        "id",
+        "statement"
+      ],
+      "title": "Requirement",
+      "type": "object",
+      "markdownDescription": "A single verifiable security requirement.\n\nUsed both as a top-level baseline entry (flat) and as the leaf shape\nnested inside `GroupedRequirement.sub_requirements`. Severity is\nnot on the requirement \u2014 the verifier assigns it per finding based\non the observed gap (impact, exposure, exploitability)."
+    }
+  },
+  "additionalProperties": false,
+  "description": "A loaded requirement baseline.",
+  "properties": {
+    "version": {
+      "const": 1,
+      "default": 1,
+      "description": "Baseline file schema version. Bumped on breaking changes.",
+      "title": "Version",
+      "type": "integer",
+      "markdownDescription": "Baseline file schema version. Bumped on breaking changes."
+    },
+    "baseline": {
+      "$ref": "#/$defs/BaselineMetadata"
+    },
+    "requirements": {
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/Requirement"
+          },
+          {
+            "$ref": "#/$defs/GroupedRequirement"
+          }
+        ]
+      },
+      "minItems": 1,
+      "title": "Requirements",
+      "type": "array"
+    }
+  },
+  "required": [
+    "baseline",
+    "requirements"
+  ],
+  "title": "Cl\u00e9 requirement baseline",
+  "type": "object",
+  "markdownDescription": "A loaded requirement baseline."
+}
