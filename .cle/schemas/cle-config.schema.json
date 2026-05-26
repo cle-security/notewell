@@ -312,20 +312,20 @@
         {
           "const": "asvs-l1",
           "title": "asvs-l1",
-          "description": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 1: critical starting point covering ~20% of requirements. Focuses on first-layer defenses against common attacks that don't require other vulnerabilities to be exploitable.",
-          "markdownDescription": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 1: critical starting point covering ~20% of requirements. Focuses on first-layer defenses against common attacks that don't require other vulnerabilities to be exploitable."
+          "description": "ASVS is a security requirements catalog for web applications. It has three levels. Level 1 is a critical starting point covering ~20% of requirements. Focuses on first-layer defenses against common attacks that don't require other vulnerabilities to be exploitable.",
+          "markdownDescription": "ASVS is a security requirements catalog for web applications. It has three levels. Level 1 is a critical starting point covering ~20% of requirements. Focuses on first-layer defenses against common attacks that don't require other vulnerabilities to be exploitable."
         },
         {
           "const": "asvs-l2",
           "title": "asvs-l2",
-          "description": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 2: recommended for most applications, covering ~70% of requirements. Adds protections against less common attacks and more complex defenses that may require certain preconditions to exploit.",
-          "markdownDescription": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 2: recommended for most applications, covering ~70% of requirements. Adds protections against less common attacks and more complex defenses that may require certain preconditions to exploit."
+          "description": "ASVS is a security requirements catalog for web applications. It has three levels. Level 2 is recommended for most applications, covering ~70% of requirements. Adds protections against less common attacks and more complex defenses that may require certain preconditions to exploit.",
+          "markdownDescription": "ASVS is a security requirements catalog for web applications. It has three levels. Level 2 is recommended for most applications, covering ~70% of requirements. Adds protections against less common attacks and more complex defenses that may require certain preconditions to exploit."
         },
         {
           "const": "asvs-l3",
           "title": "asvs-l3",
-          "description": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 3: highest level of security covering all requirements. Adds defense-in-depth mechanisms and hard-to-implement controls for applications demanding the strongest assurance.",
-          "markdownDescription": "The Application Security Verification Standard is a list of application security requirements that architects, developers, testers, security professionals, tool vendors, and consumers can use to define, build, test, and verify secure applications.\n\nLevel 3: highest level of security covering all requirements. Adds defense-in-depth mechanisms and hard-to-implement controls for applications demanding the strongest assurance."
+          "description": "ASVS is a security requirements catalog for web applications. It has three levels. Level 3 is the highest level of security covering all requirements. Adds defense-in-depth mechanisms and hard-to-implement controls for applications demanding the strongest assurance.",
+          "markdownDescription": "ASVS is a security requirements catalog for web applications. It has three levels. Level 3 is the highest level of security covering all requirements. Adds defense-in-depth mechanisms and hard-to-implement controls for applications demanding the strongest assurance."
         },
         {
           "const": "masvs",

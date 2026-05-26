@@ -1,337 +1,326 @@
 # yaml-language-server: $schema=./schemas/cle-onboarding-lock.schema.json
 schema_version: 1
 baseline: asvs-l2
-generated_at_sha: dacaf775d21e74141f2cdf4a25cdddade0269827
+generated_at_sha: 6c5efc04297f82185f66306000e7aa4f100bbde6
 config_exclusions_hash: 4f53cda18c2baa0c
 exclusions:
-- requirement: V1.2.5
-  reason: No OS command execution found. Searched for child_process, exec, spawn —
-    no matches in the codebase. The application does not invoke any system commands
-    or shell interpreters.
-  source: agent
 - requirement: V1.2.6
-  reason: No LDAP queries or libraries found. The application uses Prisma/SQLite for
-    data access and does not integrate with any LDAP directory.
+  reason: No LDAP integration found. Searched for 'ldap', 'LDAP' — no matches. The
+    app uses SQLite via Prisma with no directory service connectivity.
   source: agent
 - requirement: V1.2.7
-  reason: No XPath queries or XML processing found. The application has no XML parser
-    and does not construct or evaluate XPath expressions.
+  reason: No XPath queries or XML processing found. The API returns JSON exclusively;
+    no XML parsers or XPath dependencies exist.
   source: agent
 - requirement: V1.2.8
-  reason: No LaTeX processing found. The application does not render, compile, or
-    transmit any LaTeX content.
-  source: agent
-- requirement: V1.2.9
-  reason: No user-provided regular expressions found. Regex patterns used in Zod schemas
-    (e.g., /^[a-zA-Z0-9_]+$/) are hardcoded on the server, not constructed from user
-    input. Database search uses Prisma's `contains` (parameterized), not regex.
+  reason: No LaTeX processing found. Searched for 'latex', 'pandoc' — no matches.
+    No LaTeX rendering or compilation capability exists.
   source: agent
 - requirement: V1.3.4
-  reason: No SVG upload or processing found. The allowed MIME types for upload are
-    PNG, JPEG, GIF, WEBP, and PDF (apps/api/src/lib/storage.ts line 6–12). SVG is
-    explicitly excluded from the allowlist.
+  reason: No SVG upload handling or processing found. The upload allowlist (apps/api/src/lib/storage.ts)
+    permits only PNG/JPEG/GIF/WEBP/PDF; no SVG acceptance or sanitization logic.
   source: agent
 - requirement: V1.3.6
-  reason: No outbound HTTP requests from the backend based on user-supplied URLs.
-    Searched for fetch, axios, http.get/request — no matches. The application does
-    not make server-to-server requests using user-controlled data, eliminating the
-    SSRF surface.
+  reason: No server-side outbound HTTP requests or URL-fetch capability found. The
+    backend makes no external HTTP calls; only the browser-side fetch client exists,
+    which is same-origin. No SSRF surface.
   source: agent
 - requirement: V1.3.8
-  reason: No JNDI usage. JNDI (Java Naming and Directory Interface) is a Java-specific
-    technology; this application is built on Node.js/TypeScript.
+  reason: No JNDI lookups found. This is a Node.js/TypeScript application, not Java;
+    no JNDI or naming directory interface exists.
   source: agent
 - requirement: V1.3.9
-  reason: No memcache integration found. The application uses no caching layer (no
-    Redis, memcached, or similar). Searched for memcache — no matches.
+  reason: No memcache or Redis integration found. Searched for 'memcache', 'memcached',
+    'redis', 'ioredis' — no matches. Caching is not used in this application.
   source: agent
 - requirement: V1.3.10
-  reason: No C-style format string functions (printf/snprintf etc.) exist in this
-    TypeScript/Node.js codebase. Format string injection is a compiled-language concern;
-    the application uses template literals and JSON, not positional format strings.
+  reason: No format string processing found. The application is JavaScript/TypeScript;
+    there are no C-style printf/sprintf format strings passed to system-level functions.
   source: agent
 - requirement: V1.3.11
-  reason: No email sending functionality found. The application has no SMTP, IMAP,
-    or mail transport integration. No nodemailer, emailjs, or similar libraries in
-    dependencies.
+  reason: No email sending functionality found. Searched for 'nodemailer', 'sendmail',
+    'smtp', 'imap' — no matches. No mail integration exists.
   source: agent
 - requirement: V1.4.1
-  reason: The application is written in TypeScript/Node.js, a memory-safe runtime
-    with automatic bounds checking on strings and buffers. There are no C/C++ native
-    add-ons (beyond argon2's native binding, which manages its own memory). No manual
-    pointer arithmetic or buffer copy operations exist in the application code.
+  reason: No unmanaged or native code memory operations found. The application is
+    purely JavaScript/TypeScript running on Node.js; no C/C++ addons, no pointer arithmetic,
+    no manual memory management.
+  source: agent
+- requirement: V1.4.2
+  reason: No integer overflow concerns from low-level code. The application is JavaScript/TypeScript
+    on Node.js with no native modules (beyond argon2 which is a well-maintained native
+    addon). Integer overflow is not a realistic threat in this stack.
   source: agent
 - requirement: V1.4.3
-  reason: The application runs on Node.js with automatic garbage collection. There
-    are no manual memory allocations, pointer operations, or use-after-free patterns
-    in the codebase.
+  reason: No manual memory management found. JavaScript/TypeScript with garbage collection;
+    no explicit free/delete, dangling pointers, or use-after-free patterns exist in
+    this codebase.
   source: agent
 - requirement: V1.5.1
-  reason: No XML parsing found. The application does not parse XML documents and has
-    no XML parser dependency, so XXE attacks are not applicable.
+  reason: No XML parsing found. The application processes JSON exclusively; no XML
+    parsers (xmldom, xml2js, sax, fast-xml-parser, libxml) are present.
   source: agent
 - requirement: V1.5.2
-  reason: No unsafe deserialization found. Data deserialization uses JSON.parse (safe
-    in Node.js) and Zod schema validation. There is no Java-style object deserialization,
-    pickle, or similar mechanism.
+  reason: No deserialization of untrusted data with object-type instantiation found.
+    The application uses JSON.parse on client requests (via Fastify's built-in parser)
+    and Prisma for database access; neither allows arbitrary class instantiation.
   source: agent
 - requirement: V4.3.1
-  reason: No GraphQL found. Searched for gql, graphql, Apollo, strawberry — no matches.
-    The API surface is REST only.
+  reason: No GraphQL found. Searched for 'graphql', 'gql', 'apollo' — no GraphQL schema,
+    resolvers, or libraries exist. The API surface is REST only.
   source: agent
 - requirement: V4.3.2
-  reason: No GraphQL found. Introspection protection is not applicable to a REST-only
-    API surface.
+  reason: No GraphQL found. The API is REST only; no GraphQL introspection to disable.
   source: agent
 - requirement: V4.4.1
-  reason: No WebSocket connections found. The application uses standard HTTP request/response
-    only. Searched for ws, WebSocket, socket.io — no matches in dependencies or code.
+  reason: No WebSocket connections found. Searched for 'websocket', 'ws://', 'wss://',
+    'socket.io' — no matches. No WebSocket upgrade or server exists.
   source: agent
 - requirement: V4.4.2
-  reason: No WebSocket connections found. Origin header checking for WebSocket handshakes
-    is not applicable.
+  reason: No WebSocket connections found. No WebSocket handshake or Origin validation
+    logic exists.
   source: agent
 - requirement: V4.4.3
-  reason: No WebSocket connections found. WebSocket session management tokens are
-    not applicable.
+  reason: No WebSocket connections found. The application uses standard HTTP cookie-based
+    sessions exclusively.
   source: agent
 - requirement: V4.4.4
-  reason: No WebSocket connections found. HTTPS-to-WebSocket transition security is
-    not applicable.
+  reason: No WebSocket connections found. No WebSocket channel exists to transition
+    from HTTPS.
   source: agent
 - requirement: V6.5.1
-  reason: No MFA authentication mechanisms found. The application uses single-factor
-    password authentication only. No TOTP, lookup secrets, or out-of-band authentication
-    is implemented.
+  reason: No multi-factor authentication or lookup secret mechanisms found. The application
+    uses password-only authentication with no TOTP, SMS, or out-of-band codes.
   source: agent
 - requirement: V6.5.2
-  reason: No MFA lookup secrets stored. No TOTP seeds or out-of-band codes are generated
-    or persisted. Single-factor password authentication only.
+  reason: No lookup secrets, out-of-band codes, or TOTP seeds stored in the application.
+    Only password hashes (argon2id) exist; no secondary authentication factor storage.
   source: agent
 - requirement: V6.5.3
-  reason: No MFA codes generated. No TOTP seeds, lookup secrets, or out-of-band codes
-    exist in the application.
+  reason: No lookup secrets, out-of-band codes, or TOTP seeds are generated. The application
+    has no MFA mechanism that generates such values.
   source: agent
 - requirement: V6.5.4
-  reason: No MFA codes generated. Lookup secret entropy requirements are not applicable.
+  reason: No lookup secrets or out-of-band codes exist. The application does not implement
+    any form of multi-factor authentication.
   source: agent
 - requirement: V6.5.5
-  reason: No MFA with time-based or out-of-band codes. TOTP and out-of-band authentication
-    lifetimes are not applicable.
+  reason: No TOTP or out-of-band authentication codes exist. No MFA mechanisms are
+    implemented.
   source: agent
 - requirement: V6.6.1
-  reason: No SMS or PSTN-based OTP authentication. The application does not send or
-    verify one-time passwords via phone or SMS.
+  reason: No PSTN/SMS-based OTP delivery found. No SMS or phone number verification
+    code exists. Searched for 'nodemailer', 'smtp', 'sms', 'twilio' — no matches.
   source: agent
 - requirement: V6.6.2
-  reason: No out-of-band authentication. Binding of out-of-band requests to original
-    authentication requests is not applicable.
+  reason: No out-of-band authentication mechanisms exist in the application.
   source: agent
 - requirement: V6.6.3
-  reason: No out-of-band code verification. Rate limiting for out-of-band authentication
-    codes is not applicable.
+  reason: No out-of-band authentication code mechanism exists. No brute-force protection
+    for OTP codes is applicable.
   source: agent
 - requirement: V6.8.1
-  reason: No identity provider integration. The application uses its own username/password
-    authentication with no external IdPs (no SAML, OAuth, or OIDC).
+  reason: No identity provider integration found. Authentication is self-managed with
+    passwords and sessions; no external IdP (Auth0, SAML, OIDC) is used.
   source: agent
 - requirement: V6.8.2
-  reason: No digital signatures on authentication assertions. The application uses
-    session cookies, not JWT or SAML tokens from an external IdP.
+  reason: No JWT or SAML assertion validation found. The application does not consume
+    tokens from an identity provider.
   source: agent
 - requirement: V6.8.3
-  reason: No SAML assertions processed. SAML replay protection is not applicable.
+  reason: No SAML assertions found. The application has no SAML integration.
   source: agent
 - requirement: V6.8.4
-  reason: No identity provider with authentication strength claims. The application
-    does not integrate with any IdP; ACR/AMR/auth_time validation is not applicable.
+  reason: No identity provider integration found. All authentication is self-managed;
+    no IdP ACR/AMR/auth_time claims are processed.
+  source: agent
+- requirement: V7.6.1
+  reason: No federated identity session management found. The application has no SSO/IdP/RP
+    integration.
+  source: agent
+- requirement: V7.6.2
+  reason: No federated identity session creation found. No IdP or RP session consent
+    flows exist.
   source: agent
 - requirement: V8.4.1
-  reason: No multi-tenancy. The application is single-tenant — all users share the
-    same database and data with no tenant isolation boundary.
+  reason: Per the user, this is a single-tenant application. No multi-tenant data
+    isolation exists or is intended.
   source: agent
 - requirement: V9.1.1
-  reason: No self-contained tokens (JWT, SAML, etc.) used for authentication or authorization.
-    The application uses reference-based sessions (session ID stored in DB) rather
-    than self-contained tokens.
+  reason: No self-contained tokens (JWTs) are used. Sessions use reference tokens
+    (server-stored random IDs validated by lookup) — no digital signature or MAC validation
+    on token content applies.
   source: agent
 - requirement: V9.1.2
-  reason: No self-contained token signing algorithms. The application uses server-signed
-    reference session cookies via @fastify/cookie, not JWT or similar self-contained
-    token structures.
+  reason: No self-contained tokens (JWTs) are used. Session tokens are opaque reference
+    IDs validated by database lookup, not by algorithm-based signature verification.
   source: agent
 - requirement: V9.1.3
-  reason: No self-contained tokens with external key sources. JWT jku/x5u headers
-    and similar are not applicable since the app does not use JWT.
+  reason: No self-contained tokens with key material headers (jku, x5u, jwk) are used.
+    Session IDs are reference tokens validated server-side.
+  source: agent
+- requirement: V9.2.2
+  reason: No self-contained tokens with type claims (e.g., access_token vs id_token)
+    are used. Session tokens are opaque reference IDs.
   source: agent
 - requirement: V9.2.4
-  reason: No JWT tokens issued by the application, so audience impersonation across
-    token issuers is not applicable.
+  reason: No JWT or self-contained token issuance with audience claims found. The
+    application uses reference session tokens only.
   source: agent
 - requirement: V10.1.1
-  reason: No OAuth/OIDC flows. The application does not use access tokens or refresh
-    tokens; it uses session cookies.
+  reason: No OAuth/OIDC flows found. The application does not act as an OAuth client,
+    resource server, or authorization server.
   source: agent
 - requirement: V10.1.2
-  reason: No OAuth authorization flows. PKCE, state, and nonce parameters are not
-    applicable.
+  reason: No OAuth authorization code flows found. No PKCE, state, or nonce parameters
+    are used.
   source: agent
 - requirement: V10.2.1
-  reason: No OAuth client implementation. CSRF protection for OAuth code flows is
-    not applicable.
+  reason: No OAuth client functionality found. The application has no OAuth code flow
+    implementation.
   source: agent
 - requirement: V10.2.2
-  reason: No OAuth client with multiple authorization servers. Mix-up attack defense
-    is not applicable.
+  reason: No OAuth client with multiple authorization servers found. No OAuth client
+    functionality exists.
   source: agent
 - requirement: V10.3.1
-  reason: No OAuth resource server role. Audience validation of access tokens is not
-    applicable.
+  reason: No OAuth resource server found. The application authenticates via its own
+    cookie sessions, not access tokens.
   source: agent
 - requirement: V10.3.2
-  reason: No OAuth resource server role. Scope/claims-based authorization from access
-    tokens is not applicable.
+  reason: No OAuth resource server consuming access tokens with scope/authorization_details
+    claims found.
   source: agent
 - requirement: V10.3.3
-  reason: No OAuth resource server role. User identification from access tokens is
-    not applicable.
+  reason: No OAuth resource server identifying users from access tokens found.
   source: agent
 - requirement: V10.3.4
-  reason: No OAuth resource server role. ACR/AMR/auth_time validation from access
-    tokens is not applicable.
+  reason: No OAuth resource server requiring ACR/AMR/auth_time from access tokens
+    found.
   source: agent
 - requirement: V10.4.1
-  reason: No OAuth authorization server. The application does not issue authorization
+  reason: No OAuth authorization server found. The application does not issue authorization
     codes or tokens.
   source: agent
 - requirement: V10.4.2
-  reason: No OAuth authorization server. Authorization code replay protection is not
-    applicable.
+  reason: No OAuth authorization server found. No authorization code flows exist.
   source: agent
 - requirement: V10.4.3
-  reason: No OAuth authorization server. Authorization code lifetime is not applicable.
+  reason: No OAuth authorization server found. No authorization codes are issued.
   source: agent
 - requirement: V10.4.4
-  reason: No OAuth authorization server. Grant type restrictions are not applicable.
+  reason: No OAuth authorization server found. No grant types are configured.
   source: agent
 - requirement: V10.4.5
-  reason: No OAuth authorization server. Refresh token management is not applicable.
+  reason: No OAuth authorization server found. No refresh tokens are issued.
   source: agent
 - requirement: V10.4.6
-  reason: No OAuth authorization server. PKCE requirements are not applicable.
+  reason: No OAuth authorization server found. No PKCE flow exists.
   source: agent
 - requirement: V10.4.7
-  reason: No OAuth authorization server. Dynamic client registration is not applicable.
+  reason: No OAuth dynamic client registration found. No authorization server exists.
   source: agent
 - requirement: V10.4.8
-  reason: No OAuth authorization server. Refresh token expiration is not applicable.
+  reason: No OAuth refresh tokens found. No authorization server exists in this application.
   source: agent
 - requirement: V10.4.9
-  reason: No OAuth authorization server. Token revocation UI is not applicable.
+  reason: No OAuth token revocation endpoint found. No authorization server exists.
   source: agent
 - requirement: V10.4.10
-  reason: No OAuth authorization server. Confidential client authentication is not
-    applicable.
+  reason: No confidential OAuth client authentication found. No authorization server
+    exists.
   source: agent
 - requirement: V10.4.11
-  reason: No OAuth authorization server. Client scope assignment is not applicable.
+  reason: No OAuth scopes assigned to clients found. No authorization server exists.
   source: agent
 - requirement: V10.5.1
-  reason: No OIDC relying party/client. ID Token nonce validation is not applicable.
+  reason: No OIDC client (relying party) functionality found. The application does
+    not consume ID tokens.
   source: agent
 - requirement: V10.5.2
-  reason: No OIDC relying party/client. User identification from ID Token sub claim
-    is not applicable.
+  reason: No OIDC ID token processing found. No IdP integration exists.
   source: agent
 - requirement: V10.5.3
-  reason: No OIDC relying party/client. Authorization server metadata validation is
-    not applicable.
+  reason: No OIDC client validating authorization server metadata found. No IdP integration
+    exists.
   source: agent
 - requirement: V10.5.4
-  reason: No OIDC relying party/client. ID Token audience validation is not applicable.
+  reason: No OIDC audience validation for ID tokens found. No IdP integration exists.
   source: agent
 - requirement: V10.5.5
-  reason: No OIDC back-channel logout. Logout token validation is not applicable.
+  reason: No OIDC back-channel logout found. No IdP integration exists.
   source: agent
 - requirement: V10.6.1
-  reason: No OpenID Provider. The application does not function as an OIDC identity
-    provider.
+  reason: No OpenID Provider found. The application does not act as an OIDC provider.
   source: agent
 - requirement: V10.6.2
-  reason: No OpenID Provider. Forced logout denial of service is not applicable.
+  reason: No OpenID Provider found. No OIDC logout flows exist.
   source: agent
 - requirement: V10.7.1
-  reason: No OAuth authorization server. User consent for authorization requests is
-    not applicable.
+  reason: No authorization server with consent management found. No OAuth/OIDC authorization
+    server exists.
   source: agent
 - requirement: V10.7.2
-  reason: No OAuth authorization server. Consent display information is not applicable.
+  reason: No authorization server presenting consent screens found. No OAuth/OIDC
+    flows exist.
   source: agent
 - requirement: V10.7.3
-  reason: No OAuth authorization server. User consent review and revocation is not
-    applicable.
+  reason: No user consent management for OAuth scopes found. No OAuth/OIDC authorization
+    server exists.
   source: agent
 - requirement: V12.1.3
-  reason: No mTLS client certificate authentication. The application does not use
-    mutual TLS or client certificates for authentication.
+  reason: No mTLS client certificate authentication found. The application uses cookie-based
+    session authentication; no client certificates are validated.
   source: agent
 - requirement: V17.1.1
-  reason: No TURN server. The application is a notes application with no WebRTC, NAT
-    traversal, or real-time media functionality.
+  reason: No TURN server found. This is a notes web application with no real-time
+    media or WebRTC connectivity.
   source: agent
 - requirement: V17.2.1
-  reason: No DTLS/SRTP media server. The application has no real-time media transport.
+  reason: No DTLS key management found. No media server or SRTP/DTLS functionality
+    exists.
   source: agent
 - requirement: V17.2.2
-  reason: No DTLS/SRTP media server. DTLS cipher suite configuration is not applicable.
+  reason: No DTLS cipher suite configuration found. No media server exists.
   source: agent
 - requirement: V17.2.3
-  reason: No SRTP media server. RTP injection protection is not applicable.
+  reason: No SRTP authentication found. No media server exists.
   source: agent
 - requirement: V17.2.4
-  reason: No SRTP media server. Malformed SRTP packet handling is not applicable.
+  reason: No SRTP packet handling found. No media server exists.
   source: agent
 - requirement: V17.3.1
-  reason: No signaling server. Signaling-level rate limiting is not applicable.
+  reason: No signaling server found. No WebRTC or signaling functionality exists in
+    the codebase.
   source: agent
 - requirement: V17.3.2
-  reason: No signaling server. Malformed signaling message handling is not applicable.
+  reason: No signaling server found. No signaling message processing exists.
   source: agent
 open_questions:
 - id: is-the-api-deployed-behind-a-tls-termina
-  question: Is the API deployed behind a TLS-terminating reverse proxy (e.g., Nginx,
-    Caddy, HAProxy, or cloud load balancer) in production, so that HTTPS is provided
-    upstream even though the Node app itself listens on plain HTTP?
-  why: The API server binds to 0.0.0.0:3000 with no TLS configuration in code.
+  question: Is the API deployed behind a TLS-terminating reverse proxy (e.g., Caddy,
+    Nginx, HAProxy) so that external traffic reaches the app over HTTPS?
+  why: The Fastify server in index.ts listens on plain HTTP with no TLS configuration;
+    deployment TLS behavior affects several requirements.
   affects:
+  - V3.4.1
   - V12.2.1
   - V12.2.2
-  - V3.4.1
+  - V12.3.1
+  - V12.3.2
+  - V12.3.3
+  - V12.3.4
   - V4.1.2
   status: answered
-  answer: Yes — TLS terminates at a reverse proxy
-  choices:
-  - label: Yes — TLS terminates at a reverse proxy
-    description: Caddy, Nginx, HAProxy, cloud LB or similar handles HTTPS in front
-      of the app.
-  - label: No — the app handles TLS itself or is not yet deployed
-    description: There is no upstream TLS terminator; the app either handles TLS directly
-      or there is no production deployment yet.
-- id: is-there-any-rate-limiting-waf-or-simila
-  question: Is there any rate limiting, WAF, or similar anti-automation control in
-    front of the application (e.g., at the reverse proxy, CDN, or API gateway layer),
-    or is this something the application needs to handle itself?
-  why: No rate-limiting middleware or WAF configuration was found in the codebase.
+  answer: 'Yes'
+  choices: []
+- id: is-this-a-single-tenant-application-one
+  question: Is this a single-tenant application (one deployment serves one organization/user)
+    or multi-tenant (one deployment serves multiple organizations with data isolation)?
+  why: The data model has no tenant field; all users share the same database. This
+    affects whether multi-tenant authorization requirements apply.
   affects:
-  - V2.4.1
-  - V6.1.1
-  - V6.3.1
+  - V8.4.1
   status: answered
-  answer: No — no external rate limiting
-  choices:
-  - label: Yes — infrastructure provides rate limiting
-    description: A reverse proxy, CDN, or API gateway provides rate limiting or WAF
-      rules before traffic reaches the app.
-  - label: No — no external rate limiting
-    description: There is no external anti-automation control; the app is responsible
-      for anything it needs.
+  answer: single-tenant
+  choices: []

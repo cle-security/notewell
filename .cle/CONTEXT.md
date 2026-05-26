@@ -2,98 +2,76 @@
 
 ## Stack and Frameworks
 
-The project is a **pnpm monorepo** (`pnpm-workspace.yaml`) with three packages:
-
-- **`apps/api`** — Fastify 4 HTTP API (Node.js / TypeScript). Uses Prisma 5 ORM with SQLite, argon2 for password hashing, Zod for input validation, `@fastify/cookie` for signed session cookies, and `@fastify/multipart` for file uploads.
-- **`apps/web`** — Vue 3 SPA (Vite, Pinia, vue-router). Renders Markdown using `marked` + DOMPurify. No SSR — the app is a pure client-side SPA served from `index.html`.
-- **`packages/types`** — Shared TypeScript type definitions (`SessionUser`, `Note`, `NoteListItem`, `ApiError`, etc.).
-
-Runtime: Node.js ≥ 20. Package manager: pnpm 11.
-
-## Entry Points and External Interfaces
-
-**API routes** (all under `/api` prefix):
-
-| Route | Methods | Auth | Purpose |
-|---|---|---|---|
-| `/api/health` | GET | none | Health check |
-| `/api/auth/signup` | POST | none | User registration |
-| `/api/auth/login` | POST | none | Password login |
-| `/api/auth/logout` | POST | session | End session |
-| `/api/auth/me` | GET | optional | Current user info |
-| `/api/notes` | GET/POST | required | List / create notes |
-| `/api/notes/:id` | GET/PUT/DELETE | required (owner for write) | Note CRUD |
-| `/api/notes/:id/shares` | POST/DELETE | required (owner) | Share/unshare note |
-| `/api/notes/:id/attachment` | POST | required (owner) | Upload attachment |
-| `/api/attachments/:id` | GET | required (owner or share recipient) | Download attachment |
-| `/api/profile/:username` | GET | none | Public profile |
-| `/api/me/profile` | PUT | required | Update own profile |
-| `/api/admin/users` | GET | admin | List users |
-| `/api/admin/users/:id/disable` | POST | admin | Disable/enable user |
-
-**Web app**: Standard Vue SPA with client-side routing. Vite proxies `/api` → `localhost:3000` in development.
-
-**No other interfaces**: no WebSocket, no GraphQL, no CLI surface, no gRPC, no message queues, no mobile app.
+- **Backend**: Node.js 20+ / TypeScript, Fastify 4 web framework, Prisma 5 ORM, SQLite (file-based via `DATABASE_URL`).
+  - Source: `apps/api/src/index.ts`, `apps/api/package.json`, `apps/api/prisma/schema.prisma`
+- **Frontend**: Vue 3 (Composition API), Vite 5 build tool, Pinia 2 state management, Vue Router 4.
+  - Source: `apps/web/src/main.ts`, `apps/web/package.json`
+- **Shared types**: Monorepo `@cle/types` package (`packages/types/src/index.ts`).
+- **Markdown rendering**: `marked` → `DOMPurify` on the client (`apps/web/src/components/MarkdownView.vue`).
+- **Password hashing**: argon2id (`apps/api/src/lib/crypto.ts`).
+- **Validation**: Zod schemas for API input (`apps/api/src/routes/auth.ts`, `apps/api/src/routes/notes.ts`, `apps/api/src/routes/users.ts`).
+- **Session tokens**: Server-side reference tokens stored in SQLite (`Session` table, `apps/api/src/lib/sessions.ts`). 32-byte random IDs generated with `crypto.randomBytes(32)`, signed cookies via `@fastify/cookie`.
+- **File uploads**: `@fastify/multipart`; stored to local disk, MIME allowlist (PNG/JPEG/GIF/WEBP/PDF) with size limit (`apps/api/src/lib/storage.ts`, `apps/api/src/routes/uploads.ts`).
 
 ## Authentication and Authorization
 
-- **Authentication**: Email/password credential login stored as argon2id hashes (`apps/api/src/lib/crypto.ts`). Sessions are reference-based (random 256-bit base64url IDs stored in SQLite `Session` table, see `apps/api/src/lib/sessions.ts`). Sessions are signed via `@fastify/cookie` with a `SESSION_SECRET` env var (minimum 32 characters).
-- **Session lifetime**: 14-day absolute expiry (`SESSION_TTL_MS` in `sessions.ts`); no inactivity timeout observed.
-- **Authorization**: Two roles — `"user"` and `"admin"`. `requireAuth` middleware (at `apps/api/src/middleware/auth.ts`) checks session; `requireAdmin` additionally checks `role === "admin"`. Notes are owned by a user; read-sharing is supported via `NoteShare`. Owners can write/delete; shared users can only read.
-- **Admin actions**: List all users, disable/enable user accounts (which also kills all sessions for the disabled user).
-- **No MFA**, **no OAuth/OIDC**, **no external identity provider**.
+- **Password signup/login** at `POST /api/auth/signup` and `POST /api/auth/login` (`apps/api/src/routes/auth.ts`). Passwords hashed with argon2id.
+- **Session management**: Cookie-based sessions (`cle_sid`), signed with `SESSION_SECRET`, created/destroyed in `apps/api/src/lib/sessions.ts`. 14-day TTL.
+- **Auth middleware**: `attachUser` (preHandler hook on all routes) unsigns cookie and loads session/user; `requireAuth` and `requireAdmin` guard specific routes (`apps/api/src/middleware/auth.ts`).
+- **Authorization model**: Role-based (`user` / `admin`) plus ownership-based. Notes are owner-editable; shared notes are read-only. Admin endpoints at `/api/admin/*`. Profile edits are owner-only.
+- **No OAuth/OIDC, no JWT, no multi-factor authentication, no federated identity** is present in the codebase.
 
-## Data Classes and Baseline-Relevant Features
+## Entry Points and External Interfaces
 
-**Present:**
+- **API routes** (all under `/api`):
+  - `GET /api/health` — unauthenticated health check
+  - `POST /api/auth/signup`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`
+  - `GET/POST /api/notes`, `GET/PUT/DELETE /api/notes/:id`, `POST/DELETE /api/notes/:id/shares(/:userId)`
+  - `POST /api/notes/:id/attachment`, `GET /api/attachments/:id`
+  - `GET /api/profile/:username`, `PUT /api/me/profile`
+  - `GET /api/admin/users`, `POST /api/admin/users/:id/disable`
+- **Frontend**: Vue SPA served by Vite dev server, proxied to API (`apps/web/vite.config.ts`). Routes defined in `apps/web/src/router/index.ts`.
+- **No GraphQL, no WebSocket, no gRPC, no CLI surface, no mobile platform, no SSR/server-rendered HTML**.
 
-- **Password authentication** — argon2id hashes, 8–200 char passwords, server-side Zod validation.
-- **Session cookies** — `httpOnly: true`, `sameSite: "lax"`, `secure: env.isProd` (false in development), `signed: true`.
-- **File uploads** — images (PNG/JPEG/GIF/WEBP) and PDF; max 5 MB default. Stored on local disk with server-generated filenames (`crypto.randomBytes(16).hex + extension`). Path traversal guard in `readUpload`/`deleteUpload`. Content-Disposition header set on download. MIME type allowlist enforced.
-- **Markdown rendering** — user-authored note bodies (up to 50 KB) rendered client-side via `marked` → `DOMPurify.sanitize()` → `v-html`.
-- **Input validation** — Zod schemas on all API inputs.
-- **ORM/parameterized queries** — all database queries via Prisma (parameterized).
+## Baseline-Relevant Technologies and Data Classes
 
-**Absent:**
+### Present
+- **HTML/Markdown output**: User-authored Markdown rendered via `marked` → `DOMPurify` → `v-html` (`apps/web/src/components/MarkdownView.vue`).
+- **Password authentication**: Argon2id hashing; minimum 8-character password enforced by Zod (`apps/api/src/routes/auth.ts`).
+- **Session cookies**: Signed, httpOnly, sameSite=lax, Secure in production (`apps/api/src/routes/auth.ts:24-31`).
+- **File uploads**: Multipart uploads with MIME allowlist and size limits (`apps/api/src/routes/uploads.ts`, `apps/api/src/lib/storage.ts`).
+- **Database queries**: Prisma ORM (parameterized queries) against SQLite (`apps/api/src/lib/db.ts`, `apps/api/prisma/schema.prisma`).
+- **SQL (SQLite)**: Via Prisma; Prisma-generated parameterized queries.
+- **Input validation**: Zod schemas for all mutation endpoints.
+- **Content-Disposition header**: Set on file downloads with sanitization of filename (`apps/api/src/routes/uploads.ts:76-79`).
+- **CORS**: No explicit CORS configuration in code (no `@fastify/cors`).
+- **Cookie-based reference tokens**: Not self-contained/JWT.
 
-- No GraphQL, WebSocket, SSE, or real-time transport.
-- No LDAP, XPath, XML parsing, or LaTeX processing.
-- No OS command execution (`child_process`, `exec`, `spawn`).
-- No outbound HTTP/fetch calls from the backend (no SSRF surface).
-- No server-side template engine (EJS, Handlebars, etc.); Vue is compiled at build time.
-- No JWT, OAuth, or OIDC implementation.
-- No email/SMS sending functionality.
-- No payment, credit card, or financial data processing.
-- No multi-tenancy — single-application, single-database.
-- No memcache or caching layer.
-- No CORS configuration (SPA is same-origin, proxied; no cross-origin API sharing observed).
-- No rate limiting, WAF, or anti-automation middleware (per user confirmation: no external rate limiting).
+### Absent
+- No GraphQL, WebSocket, LDAP, XPath, LaTeX, XML parsers, XSLT, SSRF-capable outbound fetch (backend makes no outbound HTTP requests).
+- No JWT or self-contained token creation/validation.
+- No OAuth/OIDC server or client, no consent management.
+- No MFA, no out-of-band authentication, no TOTP/lookup secrets.
+- No JNDI, no memcache, no SMTP/IMAP.
+- No template engines (server-side), no CSS/XSL processing, no SVG upload processing.
+- No Java, no unmanaged/native code, no deserialization of binary/serialized objects.
+- No CORS configuration, no TLS/HTTPS configuration in code (Per the user: TLS terminates at an upstream reverse proxy).
+- No mTLS, no client certificate authentication.
+- No TURN server, no media/SRTP/DTLS/WebRTC signaling.
+- No format string processing, no OS command execution (`child_process`).
+- No multi-tenancy (Per the user: single-tenant).
 
-## Cookie Security Details
+## Tenancy and Trust Boundaries
 
-Session cookie name: `cle_sid`. Options at `apps/api/src/routes/auth.ts` line 24–31:
-- `path: "/"`
-- `httpOnly: true`
-- `sameSite: "lax"`
-- `secure: env.isProd` (enabled only when `NODE_ENV=production`)
-- `signed: true`
+- **Single-tenant**: One deployment, one database, all users share the same SQLite database. Per the user, this is a single-tenant application.
+- **Public boundary**: The Fastify API on port 3000; Vite dev proxy on 5173. Per the user, the app is deployed behind a TLS-terminating reverse proxy.
+- **Auth boundary**: Anonymous access to `GET /api/health`, `GET /api/profile/:username`, signup, login, and `GET /api/auth/me`. All other endpoints require authentication; admin endpoints additionally require `role === "admin"`.
 
-No `__Host-` or `__Secure-` prefix on cookie name.
+## Transport, Secrets, and Configuration
 
-## Transport and Secrets
-
-- **Per the user**: TLS terminates at a reverse proxy in front of the app; the Node.js server itself listens on plain HTTP (`0.0.0.0:3000`).
-- No TLS configuration exists in the application code.
-- Secrets are provided via environment variables: `SESSION_SECRET`, `DATABASE_URL`, `UPLOAD_DIR`, `MAX_UPLOAD_BYTES`, `PORT`, `NODE_ENV`. No secrets management solution (vault, KMS) is configured in code.
-- The `.env.example` file contains default/placeholder values including `SESSION_SECRET=change-me-to-a-long-random-string-at-least-32-chars`.
-
-## Error Handling
-
-A global error handler (`apps/api/src/middleware/error.ts`) catches Zod validation errors (returns 400 with details), propagates non-5xx Fastify errors, and returns a generic `"internal_error"` message with 500 status for unhandled errors. Stack traces are logged server-side via `req.log.error` but not sent to clients.
-
-## Deployment Notes
-
-- SQLite is the database (single-file, local). `DATABASE_URL=file:./dev.db` by default.
-- Uploaded files are stored on the local filesystem (`UPLOAD_DIR`, default `../../uploads` relative to `apps/api`).
-- No Docker configuration, CI/CD pipeline, or infrastructure-as-code files were found in the repository (only a `.devcontainer/` for development).
-- A GitHub Actions workflow exists at `.github/workflows/cle.yml`.
+- **TLS**: Per the user, TLS terminates at an upstream reverse proxy. No TLS configuration exists in the application code.
+- **Secrets managed via environment variables** (`apps/api/src/lib/env.ts`): `SESSION_SECRET` (required, min 32 chars), `DATABASE_URL`, `PORT`, `NODE_ENV`, `UPLOAD_DIR`, `MAX_UPLOAD_BYTES`.
+- **`.env.example`** at `apps/api/.env.example` documents defaults; `.env` is gitignored.
+- **No secret management vault or key management service** is integrated.
+- **No CORS headers** are set by the application.
+- **Session cookie configuration**: Defined in `apps/api/src/routes/auth.ts` (httpOnly, sameSite=lax, signed, Secure in production). Cookie name is `cle_sid`.
