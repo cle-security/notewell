@@ -22,8 +22,6 @@ It's built and run by a two-person team. No investors, no growth department, no 
 - **Shared** — pnpm workspaces, with a shared `@notewell/types` package consumed by both apps
 - **Markdown** — `marked` rendered into `DOMPurify` on the client
 
-Passwords are hashed with argon2id. Sessions are server-side records keyed by a signed, `httpOnly` cookie, so logging out — or an operator disabling an account — takes effect immediately. Uploaded files are written to disk under server-generated random names and streamed back through the API behind the same access check as the note they belong to; they are never served straight off disk.
-
 ## Running in production
 
 Notewell runs as **two containers on a single small cloud VM** (EU region). That's plenty for our scale and keeps operations boring:
@@ -93,14 +91,6 @@ apps/web/           Vue 3 frontend
 packages/types/     shared TS types between api and web
 uploads/            (gitignored) attachment blobs in local dev
 ```
-
-## Decisions
-
-- **argon2id over bcrypt** — argon2 is OWASP's current recommendation; the `argon2` package ships prebuilt binaries on common platforms and lets us use library-default parameters tuned for memory-hardness rather than bcrypt's CPU-only cost.
-- **Database-backed sessions, signed cookie carries the session ID** — keeps logout and "disable user" actually revocable (vs. JWTs that stay valid until they expire). The cookie is `httpOnly`, `sameSite=lax`, `secure` in production, and signed with `SESSION_SECRET`. We rolled our own ~30-line session table rather than pulling in `@fastify/session` and an extra store dependency.
-- **SQLite + `LIKE` for search** — `contains` queries on title and body, capped at 200 results, match how people actually use Notewell and keep the data layer a single portable file. FTS5 with Prisma is awkward enough that it isn't worth the complexity yet.
-- **`marked` + `DOMPurify`** — `marked` is fast and small but emits raw HTML; sanitising its output with DOMPurify is the standard pattern and lets us render whatever Markdown the author (or a sharer) wrote without opening the door to `<script>` or `javascript:` XSS.
-- **One attachment per note, content-type allowlist, randomised on-disk filenames** — keeps the disk layout boring (no path-traversal surface) and the API simple. Files are streamed back through the API with the same access check as the note, never served directly off disk.
 
 ## Security
 

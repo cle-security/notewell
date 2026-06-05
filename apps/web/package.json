@@ -1,6 +1,7 @@
 {
   "name": "@notewell/web",
   "version": "0.1.0",
+  "description": "Notewell web client — Vue 3 single-page app.",
   "private": true,
   "type": "module",
   "scripts": {

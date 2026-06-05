@@ -1,6 +1,7 @@
 {
   "name": "@notewell/types",
   "version": "0.1.0",
+  "description": "Shared TypeScript types for the Notewell API and web client.",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",
