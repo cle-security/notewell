@@ -31,7 +31,7 @@ baseline: asvs-l2
 
 # LLM and concurrency tuning.
 agent:
-  model: ollama:glm-5.1:cloud
+  model: ollama:kimi-k2.6:cloud
   max_concurrency: 4
 
 # Optional: how findings are reported. Default is `pretty` to stdout.

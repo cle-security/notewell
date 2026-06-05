@@ -1,105 +1,68 @@
 # Codebase Context
 
-## Stack and Frameworks
+## Stack and frameworks
 
-- **Backend**: Node.js 20+ · TypeScript · Fastify 4 (HTTP framework) · Prisma ORM · SQLite (file-based via `DATABASE_URL`)
-- **Frontend**: Vue 3 · Vite (dev server + bundler) · Pinia (state stores) · Vue Router · marked + DOMPurify (client-side Markdown rendering)
-- **Monorepo**: pnpm workspaces; shared `@cle/types` package consumed by both apps via workspace protocol
-- **Build/test**: `tsx` for dev/run, `tsc` for type-checking, `node:test` for a single smoke test, Vite for frontend bundling
+The codebase is a full-stack notes application built as a pnpm monorepo.
 
-Key dependency versions are pinned in `apps/api/package.json` and `apps/web/package.json`.
+- **Backend** — Node.js 20+, TypeScript, Fastify 4, Prisma 5 with a SQLite datasource, Zod for validation, and argon2 for password hashing (`apps/api/package.json`, `apps/api/prisma/schema.prisma`).
+- **Frontend** — Vue 3 (Composition API), Vue Router 4, Pinia state management, Vite build tool (`apps/web/package.json`).
+- **Shared** — Workspace package `@cle/types` consumed by both apps (`packages/types/`).
+- **Key libraries** — `marked` + `DOMPurify` for Markdown rendering on the client; `@fastify/cookie` and `@fastify/multipart` for cookie/session and file-upload handling.
+- **No GraphQL, WebSocket, gRPC, SOAP, mobile platforms, or server-side rendering** are present.
 
-## Authentication and Authorization
+## Authentication and authorization
 
-Authentication is password-based, implemented entirely in-app with no external identity provider:
+- **Authentication model** — Local username/password only (single-factor). No MFA, OAuth, OIDC, SAML, LDAP, or social identity providers are implemented.
+- **Password storage** — Hashed with argon2id via `argon2` (`apps/api/src/lib/crypto.ts`).
+- **Session management** — Custom database-backed sessions stored in SQLite; the session ID is carried in a signed cookie (`cle_sid`). Cookie flags are configured as `httpOnly`, `sameSite: lax`, `secure` in production, and signed with `SESSION_SECRET` (`apps/api/src/index.ts:21-24`, `apps/api/src/lib/sessions.ts`).
+- **Authorization** — Role-based access control with two roles (`user` and `admin`). Middleware enforces authentication (`requireAuth`) and admin checks (`requireAdmin`) (`apps/api/src/middleware/auth.ts`). Note ownership and read-only sharing are enforced in route handlers (`apps/api/src/routes/notes.ts`).
+- **Missing auth features** — No password-reset flow, no account-recovery mechanism, no password hints, no anti-automation or rate-limiting controls, and no audit/security logging beyond Fastify’s request logger. The README explicitly calls these out as intentionally omitted for the demo (`README.md:73`).
 
-- **Password hashing**: `argon2` with `argon2id` type (`apps/api/src/lib/crypto.ts`). Library defaults are used for memory/time parameters.
-- **Session management**: Database-backed sessions. A 256-bit random session ID (`crypto.randomBytes(32).toString("base64url")`) is stored in the `Session` SQLite table (`apps/api/src/lib/sessions.ts`). The session cookie (`cle_sid`) carries the ID, is signed via `@fastify/cookie` with `SESSION_SECRET`, and is configured as `httpOnly`, `sameSite=lax`, and `secure` in production (`apps/api/src/routes/auth.ts:24–31`).
-- **Session TTL**: 14 days absolute (`SESSION_TTL_MS` in `sessions.ts`). No sliding/rolling inactivity timeout is implemented — sessions persist until they expire or are explicitly destroyed.
-- **Auth middleware**: `attachUser` (preHandler on every route) loads the session and populates `req.user`; `requireAuth` and `requireAdmin` guard specific route groups (`apps/api/src/middleware/auth.ts`).
-- **Authorization model**: Role-based (`user` | `admin`). Notes enforce owner-only write/delete; read sharing is a separate `NoteShare` table. Admin-only user management at `/api/admin/*`. No field-level authorization beyond what the API endpoints expose.
-- **No MFA, no OAuth, no SSO, no IdP integration** — all authentication flows are local username/password.
+## Entry points and external interfaces
 
-Relevant files: `apps/api/src/routes/auth.ts`, `apps/api/src/middleware/auth.ts`, `apps/api/src/lib/crypto.ts`, `apps/api/src/lib/sessions.ts`
+- **HTTP REST API** (Fastify) listens on `0.0.0.0:3000` (`apps/api/src/index.ts:49`).
+- **Public routes**
+  - `/api/health` — liveness probe.
+  - `/api/auth/*` — signup, login, logout, current-user lookup.
+  - `/api/notes/*` — note CRUD, sharing, list/search.
+  - `/api/notes/:id/attachment` — multipart file upload (single file, max size `MAX_UPLOAD_BYTES`).
+  - `/api/attachments/:id` — file download gated by note access control.
+  - `/api/profile/:username` — public profile lookup.
+  - `/api/me/profile` — authenticated profile update.
+  - `/api/admin/users*` — admin-only user listing and disable toggle.
+- **File-upload surface** — Accepts PNG, JPEG, GIF, WEBP, and PDF only (`apps/api/src/lib/storage.ts:6-12`). Files are renamed to server-generated random hex names and stored in a local `uploads/` directory, never in a public web folder.
+- **Frontend SPA** — Served by Vite (dev: `5173`; production build is static). It proxies `/api` to the backend (`apps/web/vite.config.ts:9-14`).
+- **No API gateway, no CORS configuration, and no rate-limiting or WAF logic in code.**
 
-## Entry Points and External Interfaces
+## Baseline-relevant technologies and data classes
 
-### API (Fastify) — `apps/api/src/index.ts`
+| Technology / data class | Status | Evidence |
+|---|---|---|
+| File uploads | **Present** | Multipart endpoint with MIME allowlist (`apps/api/src/routes/uploads.ts`). |
+| Password authentication | **Present** | Hashing with argon2id (`apps/api/src/lib/crypto.ts`). |
+| Sessions (reference tokens) | **Present** | DB-backed sessions, signed cookies (`apps/api/src/lib/sessions.ts`). |
+| Markdown rendering | **Present** | Client-side rendering with `marked` + `DOMPurify` (`apps/web/src/components/MarkdownView.vue`). |
+| JWT / OAuth / OIDC / SAML | **Absent** | No JWT parsing, no OAuth flows, no SAML assertions. |
+| GraphQL | **Absent** | No schema or GraphQL libraries found. |
+| WebSocket | **Absent** | No `ws`, `socket.io`, or native WebSocket usage. |
+| LDAP / XPath / LaTeX / JNDI / Memcache | **Absent** | No relevant imports or endpoints. |
+| XML parsing / object deserialization | **Absent** | Fastify JSON parser only; no XML endpoints or unsafe deserialization libraries. |
+| OS command execution | **Absent** | No `child_process`, `exec`, or shell invocation. |
+| Server-side template engine | **Absent** | Backend returns JSON; Vue templates are build-time compiled. |
+| Multi-tenancy | **Absent** | Single-tenant application with per-user resource isolation. |
+| Self-contained tokens (JWT) | **Absent** | Uses reference tokens stored in SQLite, not JWTs. |
+| WebRTC / TURN / media / signaling | **Absent** | No WebRTC stack components. |
 
-All routes are under `/api`:
+## Tenancy and trust boundaries
 
-| Route prefix | Handler file | Auth | Key operations |
-|---|---|---|---|
-| `/api/auth/signup` | `auth.ts` | Public | POST — register |
-| `/api/auth/login` | `auth.ts` | Public | POST — login |
-| `/api/auth/logout` | `auth.ts` | Any | POST — clear session |
-| `/api/auth/me` | `auth.ts` | Any | GET — current user |
-| `/api/notes` | `notes.ts` | Auth required | CRUD + search + share |
-| `/api/notes/:id` | `notes.ts` | Auth required | Read (owner or shared), update/delete (owner) |
-| `/api/notes/:id/shares` | `notes.ts` | Auth required | POST/DELETE share |
-| `/api/notes/:id/attachment` | `uploads.ts` | Auth required (owner) | POST — upload file |
-| `/api/attachments/:id` | `uploads.ts` | Auth required (owner or shared) | GET — download file |
-| `/api/profile/:username` | `users.ts` | Public | GET — public profile |
-| `/api/me/profile` | `users.ts` | Auth required | PUT — edit own profile |
-| `/api/admin/users` | `users.ts` | Admin | GET — list users |
-| `/api/admin/users/:id/disable` | `users.ts` | Admin | POST — toggle disable |
+- The application is **single-tenant**.
+- The public trust boundary is the Fastify HTTP server. There is no subdomain separation between the API and the web frontend in development (both served from `localhost` via Vite proxy).
 
-### Frontend (Vue SPA) — `apps/web/src/router/index.ts`
+## Transport, secrets, and configuration
 
-Client-side routes with route guards for `requiresAuth` and `requiresAdmin`. Vite dev server proxies `/api` to Fastify on `:3000`.
-
-### File Upload / Download
-
-- Upload: single file per note, MIME allowlist (`image/png`, `image/jpeg`, `image/gif`, `image/webp`, `application/pdf`), configurable size limit (`MAX_UPLOAD_BYTES`, default 5 MB), stored with random hex filenames (`apps/api/src/lib/storage.ts`).
-- Download: streamed through the API with access control checks, `Content-Type` set to the stored MIME, and `Content-Disposition` set to `inline` for images / `attachment` for PDFs. Filenames are sanitized for header injection (`apps/api/src/routes/uploads.ts:77–79`).
-
-## Baseline-Relevant Technologies and Data Classes
-
-**Present**:
-- Password authentication (argon2id hashing, session cookies)
-- Database-backed sessions (reference tokens in SQLite)
-- Cookie-based session management (signed, httpOnly, sameSite=lax, secure in production)
-- REST API (JSON request/response body, query parameters, URL path parameters)
-- File uploads (multipart, MIME allowlist, size limit)
-- User-generated Markdown rendered as HTML client-side (marked + DOMPurify)
-- Input validation with Zod schemas
-- Parameterized database queries via Prisma ORM
-- SQLite database
-- Admin role with user management (disable accounts, kill sessions)
-- Note sharing (read-only share by username)
-- Public user profiles
-
-**Absent** (technologies/data classes not in the codebase):
-- GraphQL, WebSocket, SSE, gRPC, SOAP — only REST
-- OAuth / OIDC (no authorization server, client, or resource server)
-- External identity provider / SSO
-- Multi-tenancy
-- MFA / OTP / out-of-band authentication
-- JWT / self-contained tokens (only reference tokens)
-- CORS configuration (single-origin app)
-- rate limiting / anti-automation
-- TLS configuration in code
-- LDAP / XPath / XML parsing
-- SSRF surfaces (no outbound HTTP based on user input)
-- OS command execution
-- Server-side template rendering (backend returns JSON only)
-- WebSocket / real-time messaging
-- Email sending / SMTP
-- TURN / media / signaling servers
-- Memcache / Redis
-- CORS headers (not configured — single-origin app served from same domain)
-
-## Tenancy and Trust Boundaries
-
-- **Single-tenant**: All users share the same database and application instance. There is no tenant isolation logic, no tenant IDs, and no data partitioning.
-- **Public boundary**: The Fastify HTTP server is the sole entry point. Unauthenticated access is allowed on signup, login, public profile, and health endpoints. All other endpoints require a valid session cookie.
-- **Per the user**: TLS is terminated at a reverse proxy in front of the app.
-- **Per the user**: There is no external WAF, API gateway, or rate-limiting layer; Fastify is the only request-processing layer.
-
-## Transport, Secrets, and Configuration
-
-- **TLS**: Not configured in the app itself. Per the user, TLS terminates at a reverse proxy; the app listens on plain HTTP.
-- **Secrets**: `SESSION_SECRET` (env var, min 32 chars, used for cookie signing) and `DATABASE_URL` (SQLite file path) are loaded via `dotenv` from environment variables (`apps/api/src/lib/env.ts`). No secrets management solution (vault, key store) is used; `.env` files are gitignored.
-- **Configuration**: All runtime config is via environment variables (`apps/api/src/lib/env.ts`): `NODE_ENV`, `PORT`, `SESSION_SECRET`, `DATABASE_URL`, `UPLOAD_DIR`, `MAX_UPLOAD_BYTES`.
-- **Database**: SQLite file specified by `DATABASE_URL`, accessed via Prisma ORM with parameterized queries.
-- **Upload storage**: Local filesystem at `UPLOAD_DIR` (default `../../uploads`), filenames are randomly generated hex strings with extensions matching the MIME type.
+- **Configuration** is loaded from environment variables via `dotenv` in `apps/api/src/lib/env.ts`.
+- **Required secrets/variables** — `SESSION_SECRET` (enforced >= 32 characters), `DATABASE_URL`.
+- **Optional variables** — `PORT`, `UPLOAD_DIR`, `MAX_UPLOAD_BYTES`, `NODE_ENV` (`apps/api/.env.example`).
+- **TLS and security headers** — Per the user, the application is deployed behind a TLS-terminating reverse proxy in production, and that proxy adds security headers such as HSTS, CSP, and CORS. The application code itself does not configure TLS or those headers.
+- **Secrets management** — Per the user, production secrets are supplied as plain environment variables on the host; there is no integration with a secrets manager or key vault.
+- **No secrets are hard-coded in source** beyond the seed-script defaults in `.env.example`, which are dev-only values.

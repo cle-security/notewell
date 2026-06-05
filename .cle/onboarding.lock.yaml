@@ -1,331 +1,430 @@
 # yaml-language-server: $schema=./schemas/cle-onboarding-lock.schema.json
 schema_version: 1
 baseline: asvs-l2
-generated_at_sha: af3cde1781b454f29ab37ce152a0f48b70028669
+generated_at_sha: fb7c5dd7b0a00b097e19d826991f6208e1dbddaa
 config_exclusions_hash: 4f53cda18c2baa0c
 exclusions:
 - requirement: V1.2.5
-  reason: No OS command execution found in the codebase — no calls to child_process,
-    exec, spawn, or similar. The backend only uses Node.js fs module for file I/O
-    and crypto for random bytes.
+  reason: No OS command execution is performed by the application. Searched for `child_process`,
+    `exec`, `spawn` in apps/api/src — no matches. File-system operations use parameterized
+    paths only (apps/api/src/lib/storage.ts).
   source: agent
 - requirement: V1.2.6
-  reason: No LDAP queries or LDAP integration found in the codebase. Searched for
-    ldap, LDAP — no matches.
+  reason: No LDAP client or directory queries are present. Searched for `ldap`, `ldapjs`
+    across the repo — no matches.
   source: agent
 - requirement: V1.2.7
-  reason: No XPath queries found in the codebase. All data interchange is JSON; no
-    XML processing exists.
-  source: agent
-- requirement: V1.2.8
-  reason: No LaTeX processing found in the codebase. Searched for latex, tex — no
+  reason: No XPath queries are present. Searched for `xpath` across the repo — no
     matches.
   source: agent
+- requirement: V1.2.8
+  reason: No LaTeX processing or TeX-related dependencies are present. Searched for
+    `latex`, `pdflatex`, `katex` across the repo — no matches.
+  source: agent
+- requirement: V1.2.9
+  reason: No regular expressions are dynamically constructed from untrusted input.
+    The only regexes in the codebase are hardcoded allowlists (e.g., username validation
+    in apps/api/src/routes/auth.ts:14).
+  source: agent
+- requirement: V1.3.1
+  reason: No WYSIWYG editors are used. Notes are edited with a plain textarea; the
+    only rich content is Markdown. Searched for `ckeditor`, `quill`, `tinymce` — no
+    matches.
+  source: agent
+- requirement: V1.3.2
+  reason: No dynamic code execution features are present. Searched for `eval(`, `new
+    Function`, `SpEL` across the repo — no matches.
+  source: agent
 - requirement: V1.3.4
-  reason: SVG is not in the allowed MIME types for file uploads (ALLOWED_MIME in apps/api/src/lib/storage.ts
-    only allows image/png, image/jpeg, image/gif, image/webp, application/pdf). No
-    SVG-specific validation or rendering exists.
+  reason: SVG is not in the upload MIME-type allowlist. Only PNG, JPEG, GIF, WEBP,
+    and PDF are accepted (apps/api/src/lib/storage.ts:6-12).
   source: agent
 - requirement: V1.3.6
-  reason: No SSRF surface found. The backend makes no outbound HTTP/fetch calls based
-    on user-controlled input — searched for fetch, axios, http.request, https.request,
-    got, and similar — no matches.
+  reason: The backend does not initiate outbound network requests based on user input.
+    Searched for `fetch`, `http.request`, `axios` in apps/api/src — no matches.
   source: agent
 - requirement: V1.3.7
-  reason: No server-side template engine (Pug, EJS, Handlebars, etc.) is used. Vue
-    templates are compiled statically at build time; the backend returns JSON only.
-    User-supplied Markdown is rendered client-side (covered by V1.3.5).
+  reason: No server-side template engine is used. The backend returns JSON only. Frontend
+    Vue templates are compiled at build time and are not constructed from user input.
   source: agent
 - requirement: V1.3.8
-  reason: JNDI is a Java-specific technology. This is a Node.js/TypeScript application
-    — no JNDI queries or Java Naming and Directory Interface usage is possible.
+  reason: JNDI is a Java-specific technology. The application is Node.js/TypeScript
+    with no JNDI references.
   source: agent
 - requirement: V1.3.9
-  reason: No memcache or caching integration found in the codebase. Searched for memcache,
-    memcached, redis, cache — no matches.
+  reason: No memcached client or memcache integration is present. Searched for `memcache`,
+    `memcached` across the repo — no matches.
   source: agent
 - requirement: V1.3.10
-  reason: No format string processing (e.g., printf-style) found. The application
-    uses TypeScript template literals and JSON serialization; no C-style format strings
-    are used.
+  reason: No C-style format string usage with user-controlled input is present. Logging
+    uses Fastify’s structured object logger, not printf-style formatting.
   source: agent
 - requirement: V1.3.11
-  reason: No email sending or receiving functionality found. Searched for smtp, imap,
-    mail, nodemailer, sendmail — no matches.
+  reason: No mail functionality is present. Searched for `nodemailer`, `smtp`, `sendmail`,
+    `imap` across the repo — no matches.
   source: agent
 - requirement: V1.4.1
-  reason: The application runs on Node.js/V8, which provides memory-safe string operations
-    and automatic memory management. No manual buffer management, pointer arithmetic,
-    or unmanaged code is present.
+  reason: The application is written entirely in TypeScript running on Node.js, a
+    memory-safe, garbage-collected runtime. No native modules, pointer arithmetic,
+    or manual memory management were found.
+  source: agent
+- requirement: V1.4.2
+  reason: Same as V1.4.1 — memory-safe runtime with no integer-overflow-primitive
+    unmanaged code.
   source: agent
 - requirement: V1.4.3
-  reason: The application runs in a garbage-collected runtime (Node.js/V8) with no
-    manual memory management, no pointer operations, and no use of unmanaged/native
-    code modules.
+  reason: Same as V1.4.1 — no dynamically allocated unmanaged memory or dangling pointers
+    in a garbage-collected environment.
   source: agent
 - requirement: V1.5.1
-  reason: No XML parsing found in the codebase. All data interchange is JSON; no XML
-    parser, SAX parser, or DOM parser is used. Searched for xml, sax, domparser, libxml
-    — no matches.
+  reason: No XML parsing of untrusted data is performed. There are no XML endpoints;
+    the only parser for request bodies is Fastify’s built-in JSON parser.
   source: agent
 - requirement: V1.5.2
-  reason: No unsafe deserialization mechanism exists. All inbound data is parsed as
-    JSON via Fastify's built-in parser. There is no Java-style serialization, Python
-    pickle, or similar object deserialization of untrusted data.
+  reason: No object-deserialization formats (e.g., Java serialization, Python pickle,
+    PHP unserialize, YAML object loading) are used. Only JSON parsing is performed.
+  source: agent
+- requirement: V2.3.1
+  reason: No multi-step business logic wizard flows exist. All operations (signup,
+    note CRUD, sharing) are single-request transactions.
+  source: agent
+- requirement: V2.3.4
+  reason: No limited-quantity resources such as event seats or delivery slots are
+    managed. Notes and shares can be created freely without quantity constraints.
   source: agent
 - requirement: V3.5.5
-  reason: No window.postMessage usage found in the frontend code. Searched for postMessage
-    and addEventListener('message' — no matches.
+  reason: No `postMessage` usage is present. Searched for `postMessage` and `window.postMessage`
+    in apps/web — no matches.
+  source: agent
+- requirement: V3.7.2
+  reason: No server-side redirects to external hostnames or domains are implemented.
+    The backend has no redirect responses, and frontend client-side navigation stays
+    within the same origin.
+  source: agent
+- requirement: V4.1.3
+  reason: The application does not consume or trust intermediary headers such as `X-Forwarded-For`,
+    `X-Real-IP`, or `X-User-ID` for security decisions. No such headers are referenced
+    in the source.
   source: agent
 - requirement: V4.3.1
-  reason: No GraphQL schema or resolvers found; only a REST surface under /api. Searched
-    for graphql, gql, apollo, typeDefs — no matches.
+  reason: No GraphQL schema, resolvers, or libraries are present. Searched for `graphql`,
+    `apollo`, `mercurius` across the repo — no matches.
   source: agent
 - requirement: V4.3.2
-  reason: Same as V4.3.1 — no GraphQL endpoint exists in the codebase.
+  reason: Same as V4.3.1 — no GraphQL surface exists.
   source: agent
 - requirement: V4.4.1
-  reason: No WebSocket connections found anywhere in the codebase. Searched for ws,
-    WebSocket, socket.io — no matches.
+  reason: No WebSocket or Socket.io usage is present. Searched for `ws`, `wss`, `socket.io`
+    across the repo — no matches.
   source: agent
 - requirement: V4.4.2
-  reason: Same as V4.4.1 — no WebSocket handshake exists to check Origin headers.
+  reason: Same as V4.4.1 — no WebSocket handshake surface exists.
   source: agent
 - requirement: V4.4.3
-  reason: Same as V4.4.1 — no WebSocket connections, hence no dedicated WebSocket
-    session tokens.
+  reason: Same as V4.4.1 — no WebSocket session mechanism exists.
   source: agent
 - requirement: V4.4.4
-  reason: Same as V4.4.1 — no WebSocket connections, hence no session transition over
-    WebSocket.
+  reason: Same as V4.4.1 — no transition from HTTPS to WebSocket exists.
   source: agent
-- requirement: V6.1.3
-  reason: The application has a single authentication pathway (email/password login).
-    No alternative authentication pathways (e.g., social login, MFA, recovery codes)
-    exist, so no documentation of multiple pathways is applicable.
+- requirement: V5.2.3
+  reason: Upload accept list does not include compressed archive formats (zip, gz,
+    docx, odt). Only images and PDF are allowed (apps/api/src/lib/storage.ts:6-12).
   source: agent
-- requirement: V6.3.4
-  reason: The application has a single authentication pathway (email/password login).
-    There are no alternative or undocumented authentication pathways — searched for
-    all auth-related routes and middleware.
+- requirement: V5.3.1
+  reason: Uploaded files are never placed in a public web folder. They are written
+    to an internal `uploads/` directory and served only through authenticated API
+    routes. `@fastify/static` is imported but never registered in the application
+    (apps/api/src/index.ts).
+  source: agent
+- requirement: V5.4.3
+  reason: No antivirus scanning integration is present. Searched for `clamav`, `virus`,
+    `scan` across the repo — no matches.
+  source: agent
+- requirement: V6.4.1
+  reason: No system-generated initial passwords or activation codes are created by
+    the application at runtime. The seed script creates dev-only accounts but this
+    is not an application feature.
+  source: agent
+- requirement: V6.4.2
+  reason: No password hints or knowledge-based authentication ('secret questions')
+    are implemented.
   source: agent
 - requirement: V6.4.3
-  reason: No password reset or recovery flow exists in the codebase. Searched for
-    reset, recovery, forgot — no matches in routes or handlers.
+  reason: No password reset or forgotten-password feature is implemented.
   source: agent
 - requirement: V6.4.4
-  reason: No multi-factor authentication exists, so there is no MFA factor recovery
-    flow.
+  reason: No multi-factor authentication is implemented, so there are no lost-factor
+    recovery flows.
   source: agent
 - requirement: V6.5.1
-  reason: No multi-factor authentication mechanism (TOTP, lookup secrets, out-of-band
-    codes) exists in the application.
+  reason: No multi-factor authentication, lookup secrets, TOTP, or out-of-band codes
+    are implemented.
   source: agent
 - requirement: V6.5.2
-  reason: No MFA lookup secrets or out-of-band codes are stored; no MFA mechanism
-    exists.
+  reason: Same as V6.5.1 — no lookup secrets or short secrets are stored.
   source: agent
 - requirement: V6.5.3
-  reason: No MFA secret generation exists; no TOTP seeds or lookup secrets are generated.
+  reason: Same as V6.5.1 — no TOTP seeds or out-of-band codes are generated.
   source: agent
 - requirement: V6.5.4
-  reason: No MFA codes or lookup secrets exist; no entropy requirements apply.
+  reason: Same as V6.5.1 — no lookup secrets or out-of-band codes exist.
   source: agent
 - requirement: V6.5.5
-  reason: No MFA tokens with lifetimes exist; no TOTP or out-of-band authentication
-    is implemented.
+  reason: Same as V6.5.1 — no out-of-band requests or TOTP time windows are configured.
   source: agent
 - requirement: V6.6.1
-  reason: No out-of-band authentication (SMS, PSTN OTP) exists in the application.
+  reason: No out-of-band authentication via PSTN/SMS or phone-based OTP is implemented.
   source: agent
 - requirement: V6.6.2
-  reason: No out-of-band authentication mechanism exists to bind to an original request.
+  reason: Same as V6.6.1 — no out-of-band authentication mechanism exists.
   source: agent
 - requirement: V6.6.3
-  reason: No out-of-band authentication codes exist to protect against brute force.
+  reason: Same as V6.6.1 — no code-based out-of-band authentication exists.
   source: agent
 - requirement: V6.8.1
-  reason: No external identity provider integration exists. Authentication is handled
-    entirely internally with password-based login; there is no SSO, SAML, or OAuth/OIDC
-    IdP.
+  reason: The application uses only local username/password authentication. No Identity
+    Provider (IdP) integrations are present.
   source: agent
 - requirement: V6.8.2
-  reason: No authentication assertions (JWT, SAML) from an external identity provider
-    are processed; all auth is internal.
+  reason: Same as V6.8.1 — no authentication assertions (JWT, SAML) are used.
   source: agent
 - requirement: V6.8.3
-  reason: No SAML integration exists in the codebase.
+  reason: Same as V6.8.1 — no SAML assertions are processed.
   source: agent
 - requirement: V6.8.4
-  reason: No external identity provider is used, so there are no IdP authentication
-    strength claims to verify.
+  reason: Same as V6.8.1 — no separate IdP is used.
   source: agent
 - requirement: V7.6.1
-  reason: No SSO or federated identity management exists. Sessions are entirely local
-    to this application; there are no Relying Party / Identity Provider relationships.
+  reason: No federated identity, SSO, or relying-party/IdP session coordination is
+    implemented.
   source: agent
 - requirement: V7.6.2
-  reason: No federated session creation exists; there are no IdP-initiated sessions.
+  reason: Same as V7.6.1 — no federated session creation flow exists.
   source: agent
 - requirement: V8.4.1
-  reason: The application is single-tenant. There is no tenant ID, no data partitioning,
-    and no cross-tenant interaction. The User model has a role field (user/admin)
-    but no tenant field.
+  reason: The application is single-tenant. There is no multi-tenant architecture
+    or cross-tenant isolation requirement.
   source: agent
 - requirement: V9.1.1
-  reason: The application uses database-backed reference tokens (session IDs stored
-    in SQLite), not self-contained tokens like JWTs. Cookie signing is handled by
-    @fastify/cookie with a shared secret, not by token digital signatures.
+  reason: Sessions are reference tokens stored in SQLite, not self-contained tokens
+    (JWTs or similar).
   source: agent
 - requirement: V9.1.2
-  reason: Same as V9.1.1 — no self-contained tokens (JWTs) are used; session tokens
-    are opaque reference IDs verified against the database.
+  reason: Same as V9.1.1 — no self-contained tokens are used.
   source: agent
 - requirement: V9.1.3
-  reason: Same as V9.1.1 — no self-contained token key material (jku, x5u, jwk headers)
-    is processed because no JWTs are used.
+  reason: Same as V9.1.1 — no self-contained token key material exists.
   source: agent
 - requirement: V9.2.1
-  reason: No self-contained tokens with nbf/exp claims are used. Session expiry is
-    managed server-side in the database.
+  reason: Same as V9.1.1 — no self-contained tokens with time claims are used.
   source: agent
 - requirement: V9.2.2
-  reason: No self-contained tokens with type/purpose claims are used. The session
-    cookie is a reference token; its purpose is implicit.
+  reason: Same as V9.1.1 — no token-type validation is needed.
   source: agent
 - requirement: V9.2.3
-  reason: No self-contained tokens with audience (aud) claims are used.
+  reason: Same as V9.1.1 — no audience validation for self-contained tokens is needed.
   source: agent
 - requirement: V9.2.4
-  reason: No tokens are issued to different audiences; the session cookie is a reference
-    token used only by this application.
+  reason: Same as V9.1.1 — no shared keys for multiple token audiences exist.
   source: agent
 - requirement: V10.1.1
-  reason: No OAuth or OIDC flows exist in the application. There is no authorization
-    server, OAuth client, or resource server.
+  reason: No OAuth, OIDC, or token-distribution patterns are implemented.
   source: agent
 - requirement: V10.1.2
-  reason: No OAuth client or authorization flow exists; no authorization codes, PKCE,
-    state, or nonce parameters are used.
+  reason: Same as V10.1.1 — no OAuth client flows exist.
   source: agent
 - requirement: V10.2.1
-  reason: No OAuth client exists to protect against CSRF during code flow.
+  reason: Same as V10.1.1 — no OAuth client exists.
   source: agent
 - requirement: V10.2.2
-  reason: No OAuth client interacts with multiple authorization servers; no mix-up
-    attack surface exists.
+  reason: Same as V10.1.1 — no OAuth client with multiple authorization servers exists.
   source: agent
 - requirement: V10.3.1
-  reason: No resource server validates access tokens; only internal session cookies
-    are used.
+  reason: Same as V10.1.1 — no OAuth resource server exists.
   source: agent
 - requirement: V10.3.2
-  reason: No resource server makes authorization decisions from access token claims;
-    authorization is based on database-backed sessions.
+  reason: Same as V10.1.1 — no delegated authorization via OAuth exists.
   source: agent
 - requirement: V10.3.3
-  reason: No access tokens with subject claims are used; user identity comes from
-    the session database record.
+  reason: Same as V10.1.1 — no access-token-based user identification exists.
   source: agent
 - requirement: V10.3.4
-  reason: No access tokens with acr/amr/auth_time claims exist; no resource server
-    verifies authentication strength from tokens.
+  reason: Same as V10.1.1 — no access token with authentication-strength claims exists.
   source: agent
 - requirement: V10.4.1
-  reason: No OAuth authorization server exists in the application.
+  reason: Same as V10.1.1 — no OAuth authorization server exists.
   source: agent
 - requirement: V10.4.2
-  reason: No OAuth authorization server exists; no authorization codes are issued.
+  reason: Same as V10.1.1 — no authorization code issuance exists.
   source: agent
 - requirement: V10.4.3
-  reason: No OAuth authorization server exists; no authorization code lifetimes to
-    enforce.
+  reason: Same as V10.1.1 — no authorization code mechanism exists.
   source: agent
 - requirement: V10.4.4
-  reason: No OAuth authorization server exists; no grant types to restrict.
+  reason: Same as V10.1.1 — no OAuth grant usage exists.
   source: agent
 - requirement: V10.4.5
-  reason: No OAuth authorization server exists; no refresh tokens are issued.
+  reason: Same as V10.1.1 — no refresh token mechanism exists.
   source: agent
 - requirement: V10.4.6
-  reason: No OAuth authorization server exists; no PKCE enforcement applies.
+  reason: Same as V10.1.1 — no PKCE or code grant exists.
   source: agent
 - requirement: V10.4.7
-  reason: No OAuth authorization server with dynamic client registration exists.
+  reason: Same as V10.1.1 — no dynamic client registration exists.
   source: agent
 - requirement: V10.4.8
-  reason: No OAuth authorization server exists; no refresh token expiration to enforce.
+  reason: Same as V10.1.1 — no refresh tokens exist.
   source: agent
 - requirement: V10.4.9
-  reason: No OAuth authorization server exists; no token revocation endpoint.
+  reason: Same as V10.1.1 — no token revocation UI exists.
   source: agent
 - requirement: V10.4.10
-  reason: No OAuth authorization server exists; no confidential client authentication.
+  reason: Same as V10.1.1 — no confidential client backchannel exists.
   source: agent
 - requirement: V10.4.11
-  reason: No OAuth authorization server exists; no scope assignment to clients.
+  reason: Same as V10.1.1 — no OAuth scope assignment exists.
   source: agent
 - requirement: V10.5.1
-  reason: No OIDC client (Relying Party) exists; no ID Tokens are processed.
+  reason: Same as V10.1.1 — no OIDC relying party exists.
   source: agent
 - requirement: V10.5.2
-  reason: No OIDC client exists; no ID Token subject claims to map.
+  reason: Same as V10.1.1 — no ID Token processing exists.
   source: agent
 - requirement: V10.5.3
-  reason: No OIDC client exists; no authorization server metadata to validate.
+  reason: Same as V10.1.1 — no authorization server metadata consumption exists.
   source: agent
 - requirement: V10.5.4
-  reason: No OIDC client exists; no ID Token audience validation applies.
+  reason: Same as V10.1.1 — no `aud` claim validation for ID Tokens exists.
   source: agent
 - requirement: V10.5.5
-  reason: No OIDC back-channel logout exists; no logout tokens are processed.
+  reason: Same as V10.1.1 — no OIDC back-channel logout exists.
   source: agent
 - requirement: V10.6.1
-  reason: No OpenID Provider exists in the application.
+  reason: Same as V10.1.1 — no OpenID Provider exists.
   source: agent
 - requirement: V10.6.2
-  reason: No OpenID Provider exists; no logout endpoint to protect against forced
-    logout.
+  reason: Same as V10.1.1 — no OpenID Provider logout exists.
   source: agent
 - requirement: V10.7.1
-  reason: No OAuth authorization server exists; no user consent flow.
+  reason: Same as V10.1.1 — no OAuth consent management exists.
   source: agent
 - requirement: V10.7.2
-  reason: No OAuth authorization server exists; no consent screen to present authorization
-    details.
+  reason: Same as V10.1.1 — no consent prompt mechanism exists.
   source: agent
 - requirement: V10.7.3
-  reason: No OAuth authorization server exists; no consent management for users.
+  reason: Same as V10.1.1 — no user consent review/revocation exists.
+  source: agent
+- requirement: V11.4.4
+  reason: Passwords are hashed with argon2id for authentication only; they are not
+    used to derive secret encryption keys.
+  source: agent
+- requirement: V11.6.1
+  reason: No public-key cryptography (RSA, ECC) or digital signature generation/verification
+    is performed by the application.
+  source: agent
+- requirement: V12.1.3
+  reason: No mutual TLS or client-certificate authentication is configured in the
+    application.
+  source: agent
+- requirement: V13.2.1
+  reason: The backend is a monolith with no inter-service network communication. The
+    only data layer is a local SQLite file accessed via Prisma.
+  source: agent
+- requirement: V13.2.2
+  reason: Same as V13.2.1 — no backend service-to-service communication exists.
+  source: agent
+- requirement: V13.2.3
+  reason: Same as V13.2.1 — no service accounts or credentials for backend communication
+    exist.
+  source: agent
+- requirement: V13.2.4
+  reason: Same as V13.2.1 — the application does not make outbound requests to external
+    resources.
+  source: agent
+- requirement: V13.2.5
+  reason: Same as V13.2.1 — no server-initiated outbound communication exists.
+  source: agent
+- requirement: V13.3.1
+  reason: Per the user, production secrets are supplied as plain environment variables
+    on the host; no secrets manager or key vault integration is in use.
+  source: agent
+- requirement: V13.3.2
+  reason: Same as V13.3.1 — no secrets management solution is deployed, so least-privilege
+    access to secret assets via a vault is not applicable.
+  source: agent
+- requirement: V13.4.4
+  reason: Fastify does not register an HTTP TRACE route; the application does not
+    support the TRACE method.
+  source: agent
+- requirement: V13.4.5
+  reason: No API documentation endpoints (e.g., Swagger, Redoc) or monitoring dashboards
+    are exposed by the backend. `/api/health` is present but it is a minimal liveness
+    probe, not a docs/monitoring surface.
+  source: agent
+- requirement: V15.3.2
+  reason: The backend does not make outbound HTTP requests to external URLs. Searched
+    for `fetch`, `http.request`, `axios` in apps/api/src — no matches.
   source: agent
 - requirement: V17.1.1
-  reason: No TURN server or NAT traversal functionality exists in the codebase.
+  reason: No WebRTC, TURN, or media relay functionality is present. Searched for `webrtc`,
+    `turn`, `dtls`, `srtp`, `rtp` across the repo — no matches.
   source: agent
 - requirement: V17.2.1
-  reason: No media server or DTLS certificate handling exists in the codebase.
+  reason: Same as V17.1.1 — no DTLS certificate management for media exists.
   source: agent
 - requirement: V17.2.2
-  reason: No media server or DTLS/SRTP configuration exists in the codebase.
+  reason: Same as V17.1.1 — no DTLS-SRTP cipher suite configuration exists.
   source: agent
 - requirement: V17.2.3
-  reason: No media server or SRTP authentication exists in the codebase.
+  reason: Same as V17.1.1 — no SRTP authentication at a media server exists.
   source: agent
 - requirement: V17.2.4
-  reason: No media server or SRTP packet processing exists in the codebase.
+  reason: Same as V17.1.1 — no SRTP packet processing exists.
   source: agent
 - requirement: V17.3.1
-  reason: No signaling server exists in the codebase.
+  reason: Same as V17.1.1 — no signaling server exists.
   source: agent
 - requirement: V17.3.2
-  reason: No signaling server exists in the codebase.
+  reason: Same as V17.1.1 — no signaling message processing exists.
   source: agent
 open_questions:
-- id: is-the-application-deployed-behind-a-tls
-  question: Is the application deployed behind a TLS-terminating reverse proxy (e.g.,
-    Nginx, Caddy, a cloud load balancer) that enforces HTTPS, or is the app directly
-    exposed to the internet over plain HTTP?
-  why: The codebase has no TLS/HTTPS configuration — Fastify binds to 0.0.0.0:3000
-    with no TLS setup. I need to know whether TLS is handled externally.
+- id: are-production-secrets-such-as-session-s
+  question: Are production secrets such as SESSION_SECRET and DATABASE_URL injected
+    from a secrets manager or key vault (e.g., AWS Secrets Manager, HashiCorp Vault,
+    Kubernetes secrets), or are they stored only as plain environment variables on
+    the host?
+  why: The application loads secrets exclusively via process.env in apps/api/src/lib/env.ts
+    with no in-repo secrets manager integration. The out-of-repo deployment approach
+    determines whether a secrets management solution is in use.
   affects:
+  - V13.3.1
+  - V13.3.2
+  status: answered
+  answer: No — plain environment variables on the host
+  choices:
+  - label: Yes — a secrets manager or key vault is used in production
+    description: Secrets are injected from a dedicated secrets management solution
+      rather than plain host env vars.
+  - label: No — plain environment variables on the host
+    description: Secrets are configured only as standard environment variables on
+      the server.
+- id: is-the-application-deployed-behind-a-tls
+  question: Is the application deployed behind a TLS-terminating reverse proxy (such
+    as Nginx, Caddy, or a cloud load balancer) in production, and does that layer
+    add security headers such as HSTS, CSP, or CORS?
+  why: The application listens on plain HTTP (port 3000) and does not configure TLS
+    or security headers in the Fastify source. Without confirmation of an upstream
+    proxy, it is unclear whether transport encryption and browser-security headers
+    are handled out-of-repo.
+  affects:
+  - V3.4.1
+  - V3.4.2
+  - V3.4.3
+  - V3.4.4
+  - V3.4.5
+  - V3.4.6
+  - V4.1.2
+  - V4.1.3
   - V12.1.1
   - V12.1.2
   - V12.2.1
@@ -334,37 +433,12 @@ open_questions:
   - V12.3.2
   - V12.3.3
   - V12.3.4
-  - V4.1.2
-  - V3.4.1
-  - V3.3.1
   status: answered
-  answer: Yes — TLS terminates at a reverse proxy
+  answer: Yes — TLS and headers are handled by a reverse proxy
   choices:
-  - label: Yes — TLS terminates at a reverse proxy
-    description: A reverse proxy or cloud load balancer handles HTTPS and forwards
-      to the app over plain HTTP internally.
-  - label: No — the app is directly exposed
-    description: The Fastify server handles connections directly with no TLS-terminating
-      proxy in front.
-  - label: Not yet decided / varies by env
-    description: Deployment topology isn't final or differs between environments.
-- id: is-there-any-waf-api-gateway-or-rate-lim
-  question: Is there any WAF, API gateway, or rate-limiting layer in front of the
-    application, or is the Fastify app the only thing processing requests?
-  why: The app itself has no rate-limiting middleware. I need to determine whether
-    anti-automation controls exist outside the codebase.
-  affects:
-  - V2.4.1
-  - V6.3.1
-  - V6.1.1
-  status: answered
-  answer: No — only the app itself
-  choices:
-  - label: Yes — external rate-limiting/WAF
-    description: There is a WAF, API gateway, or similar proxy that enforces rate
-      limits before traffic reaches Fastify.
-  - label: No — only the app itself
-    description: Fastify is the only layer; no external rate limiting or WAF is in
-      place.
-  - label: Unsure / varies
-    description: There may be something but it's not guaranteed or varies by environment.
+  - label: Yes — TLS and headers are handled by a reverse proxy
+    description: A reverse proxy or load balancer terminates TLS and adds HSTS, CSP,
+      CORS, or other headers in production.
+  - label: No — the application is served directly on plain HTTP
+    description: There is no TLS-terminating reverse proxy or load balancer; the app
+      is exposed directly on HTTP.
