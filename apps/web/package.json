@@ -1,5 +1,5 @@
 {
-  "name": "@cle/web",
+  "name": "@notewell/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "preview": "vite preview --port 5173"
   },
   "dependencies": {
-    "@cle/types": "workspace:*",
+    "@notewell/types": "workspace:*",
     "dompurify": "^3.1.6",
     "marked": "^14.1.2",
     "pinia": "^2.2.2",

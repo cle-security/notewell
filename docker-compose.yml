@@ -1,0 +1,43 @@
+# Production stack for Notewell: one API container + one Caddy edge, single VM.
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - deploy/.env
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      # SQLite file + uploads both live on the persistent /data volume.
+      DATABASE_URL: "file:/data/app.db"
+      UPLOAD_DIR: /data/uploads
+    volumes:
+      - data:/data
+    expose:
+      - "3000"          # internal only — never published to the host
+
+  caddy:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      # Set NOTEWELL_DOMAIN (e.g. notewell.app) to enable automatic HTTPS.
+      # Unset -> Caddy serves plain HTTP on :80 (handy for a local smoke test).
+      NOTEWELL_SITE_ADDRESS: "${NOTEWELL_DOMAIN:-:80}"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data     # ACME certificates + keys
+      - caddy_config:/config
+
+volumes:
+  data:
+    name: notewell_data
+  caddy_data:
+  caddy_config:

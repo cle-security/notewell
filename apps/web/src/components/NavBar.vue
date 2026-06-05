@@ -13,7 +13,7 @@ async function logout() {
 
 <template>
   <nav class="nav">
-    <RouterLink to="/notes">notes</RouterLink>
+    <RouterLink to="/notes" class="brand">Notewell</RouterLink>
     <RouterLink v-if="auth.isAuthed" to="/me">me</RouterLink>
     <RouterLink v-if="auth.isAdmin" to="/admin">admin</RouterLink>
     <span class="spacer" />

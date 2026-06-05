@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { Note, NoteListItem } from "@cle/types";
+import type { Note, NoteListItem } from "@notewell/types";
 import { api } from "../api/client";
 
 interface State {

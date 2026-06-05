@@ -1,5 +1,5 @@
 {
-  "name": "cle-demo-notes",
+  "name": "notewell",
   "build": {
     "dockerfile": "Dockerfile"
   },
@@ -18,8 +18,8 @@
     "5173": { "label": "web (vite)", "onAutoForward": "openPreview" }
   },
   "mounts": [
-    "source=cle-demo-notes-claude,target=/home/node/.claude,type=volume",
-    "source=cle-demo-notes-history,target=/commandhistory,type=volume"
+    "source=notewell-claude,target=/home/node/.claude,type=volume",
+    "source=notewell-history,target=/commandhistory,type=volume"
   ],
   "containerEnv": {
     "HISTFILE": "/commandhistory/.zsh_history",

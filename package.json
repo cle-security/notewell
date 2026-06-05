@@ -1,5 +1,5 @@
 {
-  "name": "cle-demo-notes",
+  "name": "notewell",
   "private": true,
   "version": "0.1.0",
   "packageManager": "pnpm@11.0.5+sha512.94fa09e72016402aefce788e46994e18eb1922998b16b6fd5aa6bafd8ae4dea05d0852f60247fdb7d5ab8199a7b0beda830398f3f80cb9f822398522a1535481",
@@ -9,9 +9,9 @@
   "scripts": {
     "dev": "pnpm -r --parallel run dev",
     "build": "pnpm -r run build",
-    "test": "pnpm --filter @cle/api run test",
-    "db:migrate": "pnpm --filter @cle/api exec prisma migrate deploy && pnpm --filter @cle/api exec prisma generate",
-    "db:reset": "pnpm --filter @cle/api exec prisma migrate reset --force",
-    "db:seed": "pnpm --filter @cle/api run seed"
+    "test": "pnpm --filter @notewell/api run test",
+    "db:migrate": "pnpm --filter @notewell/api exec prisma migrate deploy && pnpm --filter @notewell/api exec prisma generate",
+    "db:reset": "pnpm --filter @notewell/api exec prisma migrate reset --force",
+    "db:seed": "pnpm --filter @notewell/api run seed"
   }
 }

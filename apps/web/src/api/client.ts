@@ -1,4 +1,4 @@
-import type { ApiError } from "@cle/types";
+import type { ApiError } from "@notewell/types";
 
 export class ApiException extends Error {
   status: number;

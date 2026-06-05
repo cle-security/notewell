@@ -10,9 +10,6 @@ importers:
 
   apps/api:
     dependencies:
-      '@cle/types':
-        specifier: workspace:*
-        version: link:../../packages/types
       '@fastify/cookie':
         specifier: ^9.4.0
         version: 9.4.0
@@ -22,6 +19,9 @@ importers:
       '@fastify/static':
         specifier: ^7.0.4
         version: 7.0.4
+      '@notewell/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@prisma/client':
         specifier: ^5.19.1
         version: 5.22.0(prisma@5.22.0)
@@ -34,6 +34,9 @@ importers:
       fastify:
         specifier: ^4.28.1
         version: 4.29.1
+      prisma:
+        specifier: ^5.19.1
+        version: 5.22.0
       zod:
         specifier: ^3.23.8
         version: 3.25.76
@@ -41,9 +44,6 @@ importers:
       '@types/node':
         specifier: ^20.14.10
         version: 20.19.39
-      prisma:
-        specifier: ^5.19.1
-        version: 5.22.0
       tsx:
         specifier: ^4.19.0
         version: 4.21.0
@@ -53,7 +53,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@cle/types':
+      '@notewell/types':
         specifier: workspace:*
         version: link:../../packages/types
       dompurify:

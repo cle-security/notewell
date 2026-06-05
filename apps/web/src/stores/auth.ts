@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { SessionUser } from "@cle/types";
+import type { SessionUser } from "@notewell/types";
 import { api } from "../api/client";
 
 interface State {

@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { prisma } from "./db.js";
 
-export const SESSION_COOKIE = "cle_sid";
+export const SESSION_COOKIE = "notewell_sid";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 14; // 14 days
 
 export async function createSession(userId: string): Promise<{ id: string; expiresAt: Date }> {

@@ -1,0 +1,21 @@
+# Dependencies / build output (reinstalled + rebuilt inside the image)
+**/node_modules
+**/dist
+
+# Local state that must never leak into an image
+**/*.db
+**/*.db-journal
+uploads/
+**/.env
+deploy/.env
+
+# VCS, tooling, scaffolding
+.git
+.github
+.devcontainer
+.cle
+.vscode
+
+# Docs / meta
+**/*.md
+!apps/**/*.md

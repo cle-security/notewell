@@ -1,30 +1,65 @@
-# cle-demo-notes
+# Notewell
 
-A small notes app: sign up, write markdown notes, attach a file, share read-only with another user, view public profiles. Used as a target for security tooling demos, so the code intentionally aims for "honest small-startup quality" rather than airtight perfection.
+*A calm home for your notes — write in Markdown, attach a file, and share a note read-only with someone you trust.*
 
-## Stack
+Notewell is a small, independent web app for keeping the things you don't want to lose: recipes, reading lists, project logs, garden notes, climbing beta, the half-finished thought you had on the train. Write in Markdown, attach an image or a PDF, and — when you want to — share a single note read-only with another person by their username. Every account gets a simple public profile so you can point people at what you keep.
 
-- **Backend** — Node 20+ · TypeScript · Fastify · Prisma · SQLite (file-based)
+It's built and run by a two-person team. No investors, no growth department, no selling your notes to anyone — just a tool we wanted to exist and now keep online for a few thousand other people. Notewell is free while it's in beta.
+
+## What you can do
+
+- **Write notes in Markdown** — titles and bodies, rendered safely in the browser.
+- **Attach a file** — one image (PNG, JPEG, GIF, WEBP) or PDF per note, up to 5 MB.
+- **Share read-only** — share a note with another user by username; they can read it, not change it.
+- **Search** — find your notes by title or body text.
+- **Public profile** — a lightweight profile page (display name + bio), reachable by username.
+- **Accounts** — email + password sign-up, with sessions you can actually log out of.
+
+## How it's built
+
+- **Backend** — Node 20+ · TypeScript · Fastify · Prisma · SQLite (single file)
 - **Frontend** — Vue 3 · Vite · Pinia · Vue Router
-- **Shared** — pnpm workspaces, a `@cle/types` package consumed by both apps
+- **Shared** — pnpm workspaces, with a shared `@notewell/types` package consumed by both apps
 - **Markdown** — `marked` rendered into `DOMPurify` on the client
 
-## Prerequisites
+Passwords are hashed with argon2id. Sessions are server-side records keyed by a signed, `httpOnly` cookie, so logging out — or an operator disabling an account — takes effect immediately. Uploaded files are written to disk under server-generated random names and streamed back through the API behind the same access check as the note they belong to; they are never served straight off disk.
+
+## Running in production
+
+Notewell runs as **two containers on a single small cloud VM** (EU region). That's plenty for our scale and keeps operations boring:
+
+```
+        Internet ──TLS──▶  Caddy  ──/api/*──▶  app  (Fastify, :3000)
+                            │                   │
+                            │ serves SPA        ▼
+                            ▼              /data  (persistent volume)
+                       Vue static         app.db   +   uploads/
+```
+
+- **`caddy`** terminates TLS (automatic Let's Encrypt certificates), serves the built Vue SPA, adds security headers (HSTS, CSP, …), and reverse-proxies `/api/*` to the app container.
+- **`app`** is the Fastify API. It binds to `:3000` on the internal Docker network and is never published directly to the internet.
+- **`/data`** is a persistent Docker volume holding the SQLite database file and the uploads directory — the only stateful thing on the box. It's backed up off-site nightly.
+
+Production configuration and secrets are supplied as environment variables on the host. See [`docker-compose.yml`](docker-compose.yml) and [`docs/DEPLOY.md`](docs/DEPLOY.md) for the full walkthrough.
+
+## Local development
+
+### Prerequisites
 
 - Node.js **20.x** or newer
-- `pnpm` 11+ (`corepack enable` then `corepack use pnpm@11` if you don't have it)
+- `pnpm` 11+ (`corepack enable`, then `corepack use pnpm@11` if you don't have it)
 
-## Quick start
+### Quick start
 
 ```bash
 cp apps/api/.env.example apps/api/.env
 pnpm install
 pnpm db:migrate     # applies Prisma migrations + generates client
-pnpm db:seed        # creates admin + alice + bob with sample notes
+pnpm db:seed        # creates sample accounts (admin, alice, bob) with notes
 pnpm dev            # api on :3000, web on :5173 (proxied to api)
 ```
 
-Open <http://localhost:5173>. Seeded logins:
+Open <http://localhost:5173>. Seeded development accounts:
 
 | Role  | Email               | Password       |
 | ----- | ------------------- | -------------- |
@@ -32,17 +67,17 @@ Open <http://localhost:5173>. Seeded logins:
 | user  | `alice@example.com` | `alicepass123` |
 | user  | `bob@example.com`   | `bobpass123`   |
 
-## Useful commands
+### Useful commands
 
 ```bash
 pnpm dev              # both servers, parallel
 pnpm build            # type-check + production build for both apps
 pnpm test             # api smoke test (one happy-path + one auth-required check)
-pnpm db:reset         # drop + recreate sqlite db
+pnpm db:reset         # drop + recreate the sqlite db
 pnpm db:seed          # re-run the seed script (idempotent for users)
 ```
 
-## Layout
+### Layout
 
 ```
 apps/api/           Fastify backend
@@ -56,20 +91,17 @@ apps/web/           Vue 3 frontend
   src/stores/       Pinia stores (auth, notes)
   src/api/          fetch wrapper + ApiException
 packages/types/     shared TS types between api and web
-uploads/            (gitignored) attachment blobs
+uploads/            (gitignored) attachment blobs in local dev
 ```
 
 ## Decisions
 
-- **argon2id over bcrypt** — argon2 is OWASP's current recommendation; the `argon2` package builds prebuilt binaries on common platforms and lets us use library-default parameters that are tuned for memory-hardness instead of bcrypt's CPU-only cost.
-- **Database-backed sessions, signed cookie carries the session ID** — keeps logout and "disable user" actually-revocable (vs. JWTs that stay valid until expiry). The cookie is `httpOnly`, `sameSite=lax`, `secure` in production, and signed with `SESSION_SECRET`. We rolled our own session table rather than pulling in `@fastify/session` because it's ~30 lines and avoids an extra store dependency.
-- **SQLite + `LIKE` for "search"** — the spec said full-text-ish is fine, and FTS5 setup with Prisma is awkward enough that it's not worth the complexity for a demo. `contains` queries on title and body, capped at 200 results, are good enough.
-- **`marked` + `DOMPurify` instead of a "safe" markdown renderer** — `marked` is fast and small but does emit raw HTML; sanitising the output with DOMPurify is the standard pattern and lets us render markdown the user (or a sharer) wrote without worrying about XSS via `<script>` or weird `javascript:` links.
-- **One attachment per note, content-type allowlist, randomised on-disk filenames** — keeps the disk layout boring (no path traversal surface) and the API simple. Files are streamed back through the API with the same access check as the note, never served directly off disk.
-- **Shared `@cle/types` package consumed by source, not built artefacts** — both apps import `@cle/types` directly from its `src/index.ts` via the workspace `exports` field. Avoids a build step in the inner dev loop and means there's exactly one place to change a shape.
+- **argon2id over bcrypt** — argon2 is OWASP's current recommendation; the `argon2` package ships prebuilt binaries on common platforms and lets us use library-default parameters tuned for memory-hardness rather than bcrypt's CPU-only cost.
+- **Database-backed sessions, signed cookie carries the session ID** — keeps logout and "disable user" actually revocable (vs. JWTs that stay valid until they expire). The cookie is `httpOnly`, `sameSite=lax`, `secure` in production, and signed with `SESSION_SECRET`. We rolled our own ~30-line session table rather than pulling in `@fastify/session` and an extra store dependency.
+- **SQLite + `LIKE` for search** — `contains` queries on title and body, capped at 200 results, match how people actually use Notewell and keep the data layer a single portable file. FTS5 with Prisma is awkward enough that it isn't worth the complexity yet.
+- **`marked` + `DOMPurify`** — `marked` is fast and small but emits raw HTML; sanitising its output with DOMPurify is the standard pattern and lets us render whatever Markdown the author (or a sharer) wrote without opening the door to `<script>` or `javascript:` XSS.
+- **One attachment per note, content-type allowlist, randomised on-disk filenames** — keeps the disk layout boring (no path-traversal surface) and the API simple. Files are streamed back through the API with the same access check as the note, never served directly off disk.
 
-## Security posture (what this demo is and isn't)
+## Security
 
-This is meant to be reviewed and probed. It does the obvious things (parameterised queries via Prisma, hashed passwords, cookie flags, access checks on notes/attachments, sanitised markdown, MIME allowlist for uploads) but it's deliberately small. Things you would add in a real product and won't find here: rate limiting, CSRF tokens for state-changing endpoints (we rely on `sameSite=lax` only), audit logging, password-strength checks beyond a length minimum, MFA, account-recovery flows, and any kind of abuse monitoring on the attachment endpoint.
-
-If you spot something genuinely broken (vs. intentionally minimal), open an issue.
+We take reports seriously. If you think you've found a security issue, please email **security@notewell.app** rather than opening a public issue, and give us a reasonable window to fix it before disclosing. We're a small team, but we read every report and we'll get back to you.
