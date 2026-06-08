@@ -39,7 +39,7 @@ jobs:
         with:
           enable-cache: false
 
-      - name: Install cle
+      - name: Install Clé
         env:
           CLE_TOKEN: ${{ secrets.CLE_INSTALL_TOKEN }}
         run: |
@@ -48,16 +48,11 @@ jobs:
             --from "git+https://x-access-token:${CLE_TOKEN}@github.com/cle-security/cle.git#subdirectory=cle_cli" \
             cle-cli
 
-      - name: Run cle (PR diff)
+      - name: Run Clé (PR diff)
         if: github.event_name == 'pull_request'
         env:
-          #OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          #OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
-          #ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          #OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
-          FIREWORKS_API_KEY: ${{ secrets.FIREWORKS_API_KEY }}
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
           OLLAMA_BASE_URL: https://ollama.com/v1
-          LOGFIRE_TOKEN: ${{ secrets.LOGFIRE_TOKEN }}
         run: |
           cle verify \
             --since origin/${{ github.base_ref }} \
@@ -65,16 +60,11 @@ jobs:
             --reporter sarif:cle-results.sarif \
             --no-fail
 
-      - name: Run cle (full scan)
+      - name: Run Clé (full scan)
         if: github.event_name != 'pull_request'
         env:
-          #OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          #OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
-          #ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          #OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
-          FIREWORKS_API_KEY: ${{ secrets.FIREWORKS_API_KEY }}
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
           OLLAMA_BASE_URL: https://ollama.com/v1
-          LOGFIRE_TOKEN: ${{ secrets.LOGFIRE_TOKEN }}
         run: |
           cle verify \
             --reporter sarif-github:cle-results-github.sarif \
