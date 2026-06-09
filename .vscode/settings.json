@@ -1,3 +1,8 @@
 {
-  "sarif-viewer.connectToGithubCodeScanning": "on"
+  "sarif-viewer.connectToGithubCodeScanning": "on",
+  "workbench.browser.openLocalhostLinks": false,
+  "remote.portsAttributes": {
+    "5173": { "label": "web (vite)", "onAutoForward": "notify" },
+    "3000": { "label": "api (fastify)", "onAutoForward": "notify" }
+  }
 }

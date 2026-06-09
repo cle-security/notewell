@@ -15,7 +15,7 @@
   "forwardPorts": [3000, 5173],
   "portsAttributes": {
     "3000": { "label": "api (fastify)", "onAutoForward": "notify" },
-    "5173": { "label": "web (vite)", "onAutoForward": "openPreview" }
+    "5173": { "label": "web (vite)", "onAutoForward": "notify" }
   },
   "mounts": [
     "source=notewell-claude,target=/home/node/.claude,type=volume",
