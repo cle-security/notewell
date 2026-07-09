@@ -8,6 +8,7 @@ interface Profile {
   username: string;
   displayName: string;
   bio: string;
+  website: string | null;
   createdAt: string;
 }
 
@@ -36,6 +37,9 @@ watch(() => route.params.username, load);
   <div v-if="profile">
     <h1>{{ profile.displayName }}</h1>
     <p class="muted">@{{ profile.username }} · joined {{ new Date(profile.createdAt).toLocaleDateString() }}</p>
+    <p v-if="profile.website">
+      <a :href="profile.website" target="_blank">{{ profile.website }}</a>
+    </p>
     <MarkdownView :source="profile.bio || '_No bio yet._'" />
   </div>
   <p v-else-if="error" class="error">{{ error }}</p>

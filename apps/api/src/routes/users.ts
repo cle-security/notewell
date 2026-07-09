@@ -6,6 +6,7 @@ import { requireAdmin, requireAuth } from "../middleware/auth.js";
 const profileUpdate = z.object({
   displayName: z.string().min(1).max(80),
   bio: z.string().max(2000),
+  website: z.string().max(200).optional(),
 });
 
 export async function userRoutes(app: FastifyInstance) {
@@ -21,6 +22,7 @@ export async function userRoutes(app: FastifyInstance) {
         username: u.username,
         displayName: u.displayName,
         bio: u.bio,
+        website: u.website,
         createdAt: u.createdAt.toISOString(),
       },
     };
@@ -30,13 +32,18 @@ export async function userRoutes(app: FastifyInstance) {
     const data = profileUpdate.parse(req.body);
     const u = await prisma.user.update({
       where: { id: req.user!.id },
-      data: { displayName: data.displayName, bio: data.bio },
+      data: {
+        displayName: data.displayName,
+        bio: data.bio,
+        website: data.website?.trim() || null,
+      },
     });
     return reply.send({
       profile: {
         username: u.username,
         displayName: u.displayName,
         bio: u.bio,
+        website: u.website,
         createdAt: u.createdAt.toISOString(),
       },
     });
